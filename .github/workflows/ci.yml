@@ -45,7 +45,7 @@ jobs:
         run: echo "uv cache was restored"
 
       - name: download HuggingFace test model
-        run: uv run tests model_download.py ./hf_test_model_cache
+        run: uv run tests/model_download.py ./hf_test_model_cache
 
       - name: Archive HuggingFace test model download
         uses: actions/upload-artifact@v4
