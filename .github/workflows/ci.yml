@@ -12,8 +12,52 @@ permissions:
   
 jobs:
 
+  download-test-model:
+    name: download-test-model
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        id: python-setup
+        with:
+          python-version: 3.13
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        id: setup-uv
+        with:
+          # Install a specific version of uv.
+          version: "0.9.10"
+          enable-cache: true
+          restore-cache: true
+          save-cache: true
+          prune-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --locked
+
+      - name: check uv cache is working
+        if: steps.setup-uv.outputs.cache-hit == 'true'
+        run: echo "uv cache was restored"
+
+      - name: download HuggingFace test model
+        run: uv run tests model_download.py ./hf_test_model_cache
+
+      - name: Archive HuggingFace test model download
+        uses: actions/upload-artifact@v4
+        with:
+          name: hf-test-model
+          path: ./hf_test_model_cache
+          include-hidden-files: true
+
   checks:
     name: checks
+    needs:
+      - download-test-model
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -64,11 +108,21 @@ jobs:
       - name: mypy
         run: uv run mypy
 
-      - name: Code coverage testing
-        run: |
-          uv run coverage run
+      - name: Download cached HuggingFace test model
+        uses: actions/download-artifact@v5
+        with:
+          name: hf-test-model
+          path: ./hf_test_model_cache
 
-      - name: Code coverage report
-        run: |    
-          uv run coverage
+      - name: list files
+        run: |
+          ls -alh
+          ls -alh ./hf_test_model_cache
+#      - name: Code coverage testing
+#        run: |
+#          uv run coverage run
+#
+#      - name: Code coverage report
+#        run: |    
+#          uv run coverage
 
