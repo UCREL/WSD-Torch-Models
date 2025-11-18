@@ -114,10 +114,6 @@ jobs:
           name: hf-test-model
           path: ./hf_test_model_cache
 
-      - name: list files
-        run: |
-          ls -alh
-          ls -alh ./hf_test_model_cache
 #      - name: Code coverage testing
 #        run: |
 #          uv run coverage run
