@@ -5,6 +5,9 @@ from wsd_torch_models.bem import BEM
 
 class TestBEM:
 
+    def test__get_base_model() -> None:
+        # BEM._get_base_model("jhu-clsp/ettin-encoder-17m")
+
     @pytest.mark.parametrize("batch_dimension", [1, 2])
     def test__average_token_embedding_pooling(batch_dimension: int) -> None:
         """
