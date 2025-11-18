@@ -1,15 +1,15 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-	"name": "GPU",
+	"name": "CPU",
 	"remoteUser": "ubuntu",
 	"updateRemoteUserUID": true,
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"build": {
 		"dockerfile": "Dockerfile",
-		"context": ".."
+		"context": "../.."
 	},
-	"runArgs": [ "--gpus", "all", "--shm-size", "4g" ],
+	"runArgs": [ "--shm-size", "2g" ],
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
