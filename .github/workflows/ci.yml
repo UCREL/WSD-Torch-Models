@@ -144,26 +144,15 @@ jobs:
           key: ettin-17m-model-${{ runner.os }}
           lookup-only: false
 
-#      - name: Download cached HuggingFace test model
-#        uses: actions/download-artifact@v5
-#        with:
-#          name: hf-test-model
-#          path: $HOME/.cache/huggingface/hub
-      - name: list files
-        run: ls $HOME
-
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
-      - name: list files
-        run: ls $HOME/.cache/huggingface/hub
 
+      - name: Code coverage testing
+        run: |
+          uv run coverage run
 
-#      - name: Code coverage testing
-#        run: |
-#          uv run coverage run
-#
-#      - name: Code coverage report
-#        run: |    
-#          uv run coverage
+      - name: Code coverage report
+        run: |    
+          uv run coverage
 
