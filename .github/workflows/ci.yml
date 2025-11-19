@@ -137,7 +137,7 @@ jobs:
       - name: Get HF model cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/huggingface/hub
+          path: ~/hf_test_model_cache
           key: ettin-17m-model
           lookup-only: false
 
