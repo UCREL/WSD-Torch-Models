@@ -14,7 +14,10 @@ jobs:
 
   download-test-model:
     name: download-test-model
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v5
@@ -49,8 +52,7 @@ jobs:
         id: cache
         with:
           path: ~/hf_test_model_cache
-          key: ettin-17m-model
-          enableCrossOsArchive: true
+          key: ettin-17m-model-${{ runner.os }}
 
       - name: Download HuggingFace test model
         if: steps.cache.outputs.cache-hit != 'true'
@@ -61,8 +63,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: ~/hf_test_model_cache
-          key: ettin-17m-model
-          enableCrossOsArchive: true
+          key: ettin-17m-model-${{ runner.os }}
 
 
   checks:
@@ -140,9 +141,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/hf_test_model_cache
-          key: ettin-17m-model
+          key: ettin-17m-model-${{ runner.os }}
           lookup-only: false
-          enableCrossOsArchive: true
 
 #      - name: Download cached HuggingFace test model
 #        uses: actions/download-artifact@v5
