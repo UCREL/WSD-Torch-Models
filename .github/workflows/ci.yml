@@ -142,8 +142,16 @@ jobs:
 #          path: $HOME/.cache/huggingface/hub
 
       - name: list files
-        run: |
-          ls $HOME/.cache/huggingface/hub
+        run: ls $HOME/.cache/huggingface/hub
+
+      - name: list files
+        run: ls $HOME/.cache/huggingface
+
+      - name: list files
+        run: ls $HOME
+
+      - name: list files
+        run: ls
 
 #      - name: Code coverage testing
 #        run: |
