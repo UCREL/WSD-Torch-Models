@@ -56,7 +56,7 @@ jobs:
 
       - name: Download HuggingFace test model
         if: steps.cache.outputs.cache-hit != 'true'
-        run: uv run tests/model_download.py ~/hf_test_model_cache
+        run: uv run tests/model_download.py $HOME/hf_test_model_cache
 
       - name: Saving HuggingFace test model
         uses: actions/cache/save@v4
