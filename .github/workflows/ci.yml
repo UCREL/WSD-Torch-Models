@@ -152,6 +152,12 @@ jobs:
       - name: list files
         run: ls $HOME
 
+      - name: list files
+        run: ls ~
+
+      - name: list files
+        run: pwd ~
+
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
