@@ -45,16 +45,23 @@ jobs:
         run: echo "uv cache was restored"
 
       - name: Check HF model cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         id: cache
         with:
-          path: ./hf_test_model_cache
+          path: ~/hf_test_model_cache
           key: ettin-17m-model
-          lookup-only: true
 
       - name: Download HuggingFace test model
         if: steps.cache.outputs.cache-hit != 'true'
-        run: uv run tests/model_download.py ./hf_test_model_cache
+        run: uv run tests/model_download.py ~/hf_test_model_cache
+
+      - name: Saving HuggingFace test model
+        uses: actions/cache/save@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/hf_test_model_cache
+          key: ettin-17m-model
+
 
   checks:
     name: checks
@@ -128,8 +135,7 @@ jobs:
           echo "HF_HOME=$HOME/.cache/huggingface" >> "$GITHUB_ENV"
 
       - name: Get HF model cache
-        uses: actions/cache@v4
-        id: cache
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache/huggingface/hub
           key: ettin-17m-model
