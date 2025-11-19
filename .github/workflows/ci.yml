@@ -147,17 +147,12 @@ jobs:
 #          name: hf-test-model
 #          path: $HOME/.cache/huggingface/hub
 
+      - name: Move cached files
+        run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
+
       - name: list files
         run: ls $HOME/.cache/huggingface/hub
 
-      - name: list files
-        run: ls $HOME/.cache/huggingface
-
-      - name: list files
-        run: ls $HOME/hf_test_model_cache
-
-      - name: list files
-        run: ls
 
 #      - name: Code coverage testing
 #        run: |
