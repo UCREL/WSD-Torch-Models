@@ -44,15 +44,17 @@ jobs:
         if: steps.setup-uv.outputs.cache-hit == 'true'
         run: echo "uv cache was restored"
 
-      - name: download HuggingFace test model
-        run: uv run tests/model_download.py ./hf_test_model_cache
-
-      - name: Archive HuggingFace test model download
-        uses: actions/upload-artifact@v4
+      - name: Check HF model cache
+        uses: actions/cache@v4
+        id: cache
         with:
-          name: hf-test-model
           path: ./hf_test_model_cache
-          include-hidden-files: true
+          key: ettin-17m-model
+          lookup-only: true
+
+      - name: Download HuggingFace test model
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: uv run tests/model_download.py ./hf_test_model_cache
 
   checks:
     name: checks
@@ -117,7 +119,7 @@ jobs:
           mkdir "$HOME\.cache"
           mkdir "$HOME\.cache\huggingface"
           mkdir "$HOME\.cache\huggingface\hub"
-          echo "PYMUSAS_HOME=$HOME\.cache\huggingface" >> $env:GITHUB_ENV
+          echo "HF_HOME=$HOME\.cache\huggingface" >> $env:GITHUB_ENV
       
       - name: Linux create HuggingFace Hub cache directory
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
@@ -125,11 +127,19 @@ jobs:
           mkdir -p $HOME/.cache/huggingface/hub
           echo "HF_HOME=$HOME/.cache/huggingface" >> "$GITHUB_ENV"
 
-      - name: Download cached HuggingFace test model
-        uses: actions/download-artifact@v5
+      - name: Get HF model cache
+        uses: actions/cache@v4
+        id: cache
         with:
-          name: hf-test-model
-          path: $HOME/.cache/huggingface/hub
+          path: ~/.cache/huggingface/hub
+          key: ettin-17m-model
+          lookup-only: false
+
+#      - name: Download cached HuggingFace test model
+#        uses: actions/download-artifact@v5
+#        with:
+#          name: hf-test-model
+#          path: $HOME/.cache/huggingface/hub
 
       - name: list files
         run: |
