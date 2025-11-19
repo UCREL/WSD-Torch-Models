@@ -1,13 +1,15 @@
 import pytest
 import torch
+from transformers import PreTrainedModel
 
 from wsd_torch_models.bem import BEM
 
 
 class TestBEM:
 
-    # def test__get_base_model() -> None:
-    # BEM._get_base_model("jhu-clsp/ettin-encoder-17m")
+    def test__get_base_model(self) -> None:
+        base_model = BEM._get_base_model("jhu-clsp/ettin-encoder-17m")
+        assert isinstance(base_model, PreTrainedModel)
 
     @pytest.mark.parametrize("batch_dimension", [1, 2])
     def test__average_token_embedding_pooling(self, batch_dimension: int) -> None:

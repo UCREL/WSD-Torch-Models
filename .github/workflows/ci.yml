@@ -63,6 +63,9 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         os: [ubuntu-latest, macos-latest, windows-latest]
+
+    env:
+      HF_HOME: /path/to/cache_root
     
     steps:
       - uses: actions/checkout@v5
@@ -108,11 +111,29 @@ jobs:
       - name: mypy
         run: uv run mypy
 
+      - name: Windows create HuggingFace Hub cache directory
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          mkdir "$HOME\.cache"
+          mkdir "$HOME\.cache\huggingface"
+          mkdir "$HOME\.cache\huggingface\hub"
+          echo "PYMUSAS_HOME=$HOME\.cache\huggingface" >> $env:GITHUB_ENV
+      
+      - name: Linux create HuggingFace Hub cache directory
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: |
+          mkdir -p $HOME/.cache/huggingface/hub
+          echo "HF_HOME=$HOME/.cache/huggingface" >> "$GITHUB_ENV"
+
       - name: Download cached HuggingFace test model
         uses: actions/download-artifact@v5
         with:
           name: hf-test-model
-          path: ./hf_test_model_cache
+          path: $HOME/.cache/huggingface/hub
+
+      - name: list files
+        run: |
+          ls $HOME/.cache/huggingface/hub
 
 #      - name: Code coverage testing
 #        run: |
