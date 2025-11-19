@@ -149,6 +149,8 @@ jobs:
 #        with:
 #          name: hf-test-model
 #          path: $HOME/.cache/huggingface/hub
+      - name: list files
+        run: ls $HOME
 
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
