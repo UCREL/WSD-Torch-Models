@@ -1,3 +1,5 @@
+import math
+
 import pytest
 import torch
 from transformers import PreTrainedModel
@@ -7,8 +9,23 @@ from wsd_torch_models.bem import BEM
 
 class TestBEM:
 
+    BASE_MODEL_NAME = "jhu-clsp/ettin-encoder-17m"
+
+    @pytest.fixture
+    def bem_model(self) -> BEM:
+        bem_kwargs = {
+            "base_model_name": self.BASE_MODEL_NAME,
+            "freeze_base_model": True,
+            "number_transformer_encoder_layers": 0,
+            "add_scalar_mixer": False,
+            "batch_first": True,
+            "base_model": None
+        }
+        model = BEM(**bem_kwargs)  # type: ignore
+        return model
+
     def test__get_base_model(self) -> None:
-        base_model = BEM._get_base_model("jhu-clsp/ettin-encoder-17m")
+        base_model = BEM._get_base_model(self.BASE_MODEL_NAME)
         assert isinstance(base_model, PreTrainedModel)
         total_number_parameters = 0
         for parameter in base_model.parameters():
@@ -111,3 +128,32 @@ class TestBEM:
             BEM._average_token_embedding_pooling(
                 token_embeddings, token_attention_mask
             )
+
+    def test_forward_with_no_masking(self, bem_model: BEM) -> None:
+        # B = 3 T = 4 S = 2 ST = 5
+        # B x T
+        text_input_ids = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8], [1, 2, 3, 4]])
+        text_attention_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        text_word_ids_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        
+        # B x S x ST
+        label_definitions_input_ids = torch.tensor([[[1, 2, 3, 4, 5], [4, 5, 6, 7, 8]],
+                                                    [[7, 8, 9, 10, 11], [10, 11, 12, 13, 14]],
+                                                    [[1, 2, 3, 4, 5], [4, 5, 6, 7, 8]]])
+        label_definitions_attention_mask = torch.tensor([[[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+                                                         [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+                                                         [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]])
+        # B x S
+        expected_output_shape = (3, 2)
+        expected_output_dtype = torch.float32
+        result = bem_model.forward(text_input_ids,
+                                   text_attention_mask,
+                                   text_word_ids_mask,
+                                   label_definitions_input_ids,
+                                   label_definitions_attention_mask)
+        assert result.shape == expected_output_shape
+        assert result.dtype == expected_output_dtype
+        assert math.fabs(result.sum().item()) > 0.0
+        torch.testing.assert_close(result[0], result[2])
+        with pytest.raises(AssertionError):
+            torch.testing.assert_close(result[0], result[1])
