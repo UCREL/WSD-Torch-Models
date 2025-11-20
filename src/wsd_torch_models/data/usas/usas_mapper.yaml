@@ -1,0 +1,700 @@
+A:
+  A1:
+    A1.1:
+      A1.1.1:
+        title: "General actions, making etc."
+        description: "General/abstract terms relating to an activity/action (e.g. act, adventure, approach, arise); a characteristic/feature (e.g. absorb, attacking, automatically); aconstruction/craft and/or the action of constructing/crafting (e.g. arrange, assemble, bolts, boring, break)"
+      A1.1.2:
+        title: "Damaging and destroying"
+        description: "General/abstract terms depicting damage/destruction/demolition/pollution, etc"
+    A1.2:
+      title: "Suitability"
+      description: "General/abstract terms relating to appropriateness, suitability, aptness, etc"
+    A1.3:
+      title: "Caution"
+      description: "General/abstract terms relating to vigilance/care/prudence, or the lack of."
+    A1.4:
+      title: "Chance, luck"
+      description: "General/abstract terms depicting likelihood/probability/providence, or the lack of."
+    A1.5:
+      title: "Use"
+      description: ""
+      A1.5.1:
+        title: "Using"
+        description: "General/abstract terms denoting use, or the lack of"
+      A1.5.2:
+        title: "Usefulness"
+        description: "General/abstract terms denoting usefulness, or the lack of"
+    A1.6:
+      title: "Physical/mental"
+      description: "General/abstract terms denoting (level of) practicality/abstraction"
+    A1.7:
+      title: "Constraint"
+      description: "General/abstract terms denoting (level) of restriction/autonomy"
+    A1.8:
+      title: "Inclusion/Exclusion"
+      description: "General/abstract terms denoting (level of) inclusion/exclusion"
+    A1.9:
+      title: "Avoiding"
+      description: "General/abstract terms denoting (level of) avoidance/evasion, etc"
+  A2:
+    title: "Affect"
+    description: ""
+    A2.1:
+      title: "Affect: Modify, change"
+      description: "General/abstract terms denoting (propensity for) change"
+    A2.2:
+      title: "Affect: Cause/Connected"
+      description: "General/abstract terms denoting causal relationship, or lack of"
+  A3:
+    title: "Being"
+    description: "General/abstract terms relating to being/existing"
+  A4:
+    A4.1:
+      title: "Generally kinds, groups, examples"
+      description: "General/abstract terms denoting types, groups, examples"
+    A4.2:
+      title: "Particular/general; detail"
+      description: "General/abstract terms denoting (level of) generality/detail"
+  A5:
+    title: "Evaluation"
+    description: ""
+    A5.1:
+      title: "Evaluation: Good/bad"
+      description: "Evaluative terms depicting quality"
+    A5.2:
+      title: "Evaluation: True/false"
+      description: "Evaluative terms depicting truth"
+    A5.3:
+      title: "Evaluation: Accuracy"
+      description: "Evaluative terms depicting accuracy"
+    A5.4:
+      title: "Evaluation: Authenticity"
+      description: "Evaluative terms depicting authenticity"
+  A6:
+    title: "Comparing"
+    description: "General comparative terms"
+    A6.1:
+      title: "Comparing: Similar/different"
+      description: "Comparative terms denoting similarity/difference"
+    A6.2:
+      title: "Comparing: Usual/unusual"
+      description: "Comparative terms denoting (level) of anomaly"
+    A6.3:
+      title: "Comparing: Variety"
+      description: "Comparative terms denoting (level of) variety"
+  A7:
+    title: "Definite (+ modals)"
+    description: "Abstract terms of modality (possibility, necessity, certainty, etc.)"
+  A8:
+    title: "Seem/Appear"
+    description: "Abstract terms relating to appearance/impression"
+  A9:
+    title: "Getting and giving; possession"
+    description: "General/abstract terms relating to allocating/relinquishing/acquiring/receiving, etc"
+  A10:
+    title: "Open/closed; Hiding/Hidden; Finding; Showing"
+    description: "General/abstract terms relating to (level of) openness/concealment/exposure, etc"
+  A11:
+    A11.1:
+      title: "Importance: Important"
+      description: "Abstract terms denoting importance/significance"
+    A11.2:
+      title: "Importance: Noticeability"
+      description: "Abstract terms denoting noticeability/markedness"
+  A12:
+    title: "Easy/difficult"
+    description: "Abstract terms denoting (level of) difficulty"
+  A13:
+    title: "Degree"
+    description: ""
+    A13.1:
+      title: "Degree: Non-specific"
+      description: "Non-specific terms of degree (e.g. intensifiers)"
+    A13.2:
+      title: "Degree: Maximizers"
+      description: "Intensifiers that amplify to the upper extreme"
+    A13.3:
+      title: "Degree: Boosters"
+      description: "Intensifiers that amplify to a high degree (but not the upper extreme)"
+    A13.4:
+      title: "Degree: Approximators"
+      description: "Downtowners that express an approximation"
+    A13.5:
+      title: "Degree: Compromisers"
+      description: "Downtowners that express an assumed norm, or call into question the appropriacy of X"
+    A13.6:
+      title: "Degree: Diminishers"
+      description: "Downtowners that express only part of the potential force of X, or seek to imply that the force of X is limited in some way (e.g. ‘to a small extent’)"
+    A13.7:
+      title: "Degree: Minimizers"
+      description: "Downtowners that imply that the force of X is limited in a maximal way (e.g. '(not) to any extent')"
+  A14:
+    title: "Exclusivizers/particularizers"
+    description: "Focusing subjuncts that draw attention to/focus upon X. Includes exclusives and particularizers"
+  A15:
+    title: "Safety/Danger"
+    description: "Abstract terms relating to (the level) of safety/danger"
+B:  
+  B1:
+    title: "Anatomy and physiology"
+    description: "Terms relating to the (human) body and bodily processes"
+  B2:
+    title: "Health and disease"
+    description: "Terms relating to the (state of the) physical condition"
+  B3:
+    title: "Medicines and medical treatment"
+    description: "Terms relating to medication/medical treatment"
+  B4:
+    title: "Cleaning and personal care"
+    description: "Terms relating to domestic/personal hygiene"
+  B5:
+    title: "Clothes and personal belongings"
+    description: "Terms relating to clothes and other personal belongings"
+C:
+  C1:
+    title: "Arts and crafts"
+    description: "Terms relating to artistic/creative activities"
+E:
+  E1:
+    title: "General"
+    description: "General terms depicting emotional actions, states and processes"
+  E2:
+    title: "Liking"
+    description: "Terms depicting fondness/affection/partiality/attachment, or the lack of"
+  E3:
+    title: "Calm/Violent/Angry"
+    description: "Terms depicting (level of) serenity/composure/anger/violence"
+  E4:
+    E4.1:
+      title: "Happy/sad: Happy"
+      description: "Terms depicting (level of) happiness"
+    E4.2:
+      title: "Happy/sad: Contentment"
+      description: "Terms depicting (level of) contentment"
+  E5:
+    title: "Fear/bravery/shock"
+    description: "Terms relating to (level of) trepidation/courage/surprise, etc"
+  E6:
+    title: "Worry, concern, confident"
+    description: "Terms relating to (level of) apprehension/confidence, etc"
+F:
+  F1:
+    title: "Food"
+    description: "Terms relating to food and food preparation"
+  F2:
+    title: "Drinks"
+    description: "Terms relating to drinks and drinking"
+  F3:
+    title: "Cigarettes and drugs"
+    description: "Terms relating to cigarettes and (non-medicinal) drugs, including the effects of"
+  F4:
+    title: "Farming & Horticulture"
+    description: "Terms relating to agriculture and horticulture"
+G:
+  G1:
+    title: "Government, Politics & elections"
+    description: ""
+    G1.1:
+      title: "Government etc."
+      description: "Terms relating to government and governmental activities"
+    G1.2:
+      title: "Politics"
+      description: "Terms relating to politics and political activities"
+  G2:
+    title: "Crime, law and order"
+    description: ""
+    G2.1:
+      title: "Crime, law and order: Law & order"
+      description: "Terms relating to crime/criminal activities, and the legal system"
+    G2.2:
+      title: "General ethics"
+      description: "Terms relating to moral principles/accepted moral practices, or the lack of"
+  G3:
+    title: "Warfare, defence and the army; Weapons"
+    description: "Terms relating to national security/the armed forces/combat, etc."
+H:
+  H1:
+    title: "Architecture & kinds of houses & buildings"
+    description: "Terms relating to buildings/habitats of various kinds, and their construction"
+  H2:
+    title: "Parts of buildings"
+    description: "Terms relating to parts of buildings"
+  H3:
+    title: "Areas around or near houses"
+    description: "Terms relating to areas around or near houses/buildings"
+  H4:
+    title: "Residence"
+    description: "Terms relating to habitation/occupancy, or the lack of"
+  H5:
+    title: "Furniture and household fittings"
+    description: "Terms relating to furniture and fittings used within the home/buildings"
+I:
+  I1:
+    title: "Money generally"
+    description: "Terms relating to money generally"
+    I1.1:
+      title: "Money: Affluence"
+      description: "Terms relating to (level of) wealth/prosperity"
+    I1.2:
+      title: "Money: Debts"
+      description: "Terms relating to (level of) debt"
+    I1.3:
+      title: "Money: Price"
+      description: "Terms relating to cost/worth/value (includes invoicing procedures)"
+  I2:
+    title: "Business"
+    description: ""
+    I2.1:
+      title: "Business: Generally"
+      description: "Terms relating to business generally"
+    I2.2:
+      title: "Business: Selling"
+      description: "Terms relating to trading/retail"
+  I3:
+    I3.1:
+      title: "Work and employment: Generally"
+      description: "Terms relating to work and employment generally"
+    I3.2:
+      title: "Work and employment: Professionalism"
+      description: "Terms relating to (level of) professionalism"
+  I4:
+    title: "Industry"
+    description: "Terms relating to industry (including types of)"
+K:
+  K1:
+    title: "Entertainment generally"
+    description: "Terms relating to entertainment generally"
+  K2:
+    title: "Music and related activities"
+    description: "Terms relating to music and related activities"
+  K3:
+    title: "Recorded sound etc."
+    description: "Terms relating to recorded sound/sound recording"
+  K4:
+    title: "Drama, the Performing Arts, the theatre & Show-business"
+    description: "Terms relating to drama, the Performing Arts, the theatre & Show-business"
+  K5:
+    title: "Sports and games generally"
+    description: ""
+    K5.1:
+      title: "Sports"
+      description: "Terms relating to sporting activities"
+    K5.2:
+      title: "Games"
+      description: "Terms relating to games and other leisure activities"
+  K6:
+      title: "Children’s games and toys"
+      description: "Terms relating to children’s games and toys"
+L:
+  L1:
+    title: "Life and living things"
+    description: "Terms relating to life and death"
+  L2:
+    title: "Living creatures generally"
+    description: "Terms relating to living creatures (e.g. non-human)"
+  L3:
+    title: "Plants"
+    description: "Terms relating to plants and plant-life"
+M:
+  M1:
+    title: "Moving, coming and going"
+    description: "Terms depicting movement (towards and away from X)"
+  M2:
+    title: "Putting, taking, pulling, pushing,"
+    description: "Terms depicting putting/taking/pulling/pushing movements/activities"
+  M3:
+    title: "Means of transport (Land)"
+    description: "Terms depicting means of transport/ways of transporting and/or travelling (on land)"
+  M4:
+    title: "Means of transport (Water)"
+    description: "Terms depicting means of transport/ways of transporting and/or travelling (by water)"
+  M5:
+    title: "Means of transport (Air)"
+    description: "Terms depicting means of transport/ways of transporting and/or travelling (by air)"
+  M6:
+    title: "Location and direction"
+    description: "Terms depicting position of/point of reference for X"
+  M7:
+    title: "Places"
+    description: "Terms depicting geographical/conceptual spaces"
+  M8:
+    title: "Remaining/stationary"
+    description: "Terms depicting the various stages of inactivity (stopping/loitering/immobility, etc)"
+N:
+  N1:
+    title: "Numbers"
+    description: "Number terms (e.g. cardinal, ordinal, fraction, etc)"
+  N2:
+    title: "Mathematics"
+    description: "Mathematical terms"
+  N3:
+    title: "Measurement"
+    description: ""
+    N3.1:
+      title: "Measurement: General"
+      description: "General measurements"
+    N3.2:
+      title: "Measurement: Size"
+      description: "Terms of measurement relating to size"
+    N3.3:
+      title: "Measurement: Distance"
+      description: "Terms of measurement relating to distance"
+    N3.4:
+      title: "Measurement: Volume"
+      description: "Terms of measurement relating to volume"
+    N3.5:
+      title: "Measurement: Weight"
+      description: "Terms of measurement relating to weight"
+    N3.6:
+      title: "Measurement: Area"
+      description: "Terms of measurement relating to area"
+    N3.7:
+      title: "Measurement: Length & height"
+      description: "Terms of measurement relating to length and height"
+    N3.8:
+      title: "Measurement: Speed"
+      description: "Terms of measurement relating to speed"
+  N4:
+    title: "Linear order"
+    description: "Terms relating to linear movement/order, sequencing, etc."
+  N5:
+    title: "Quantities"
+    description: "Terms depicting quantities"
+    N5.1:
+      title: "Entirety; maximum"
+      description: "Terms depicting maximal/maximum quantities"
+    N5.2:
+      title: "Exceeding; waste"
+      description: "Terms depicting excessive/wasteful quantities"
+  N6:
+    title: "Frequency etc."
+    description: "Terms relating to frequency/rate of recurrence"
+O:
+  O1:
+    title: "Substances and materials generally"
+    description: "Terms relating to substances and materials generally"
+    O1.1:
+      title: "Substances and materials generally: Solid"
+      description: "Terms depicting solid substances/materials"
+    O1.2:
+      title: "Substances and materials generally: Liquid"
+      description: "Terms depicting liquid substances (other than drinks) and wetness"
+    O1.3:
+      title: "Substances and materials generally: Gas"
+      description: "Terms depicting/relating to gases"
+  O2:
+    title: "Objects generally"
+    description: "Terms relating to objects generally"
+  O3:
+    title: "Electricity and electrical equipment"
+    description: "Terms relating to electricity and electrical equipment"
+  O4:
+    title: "Physical attributes"
+    description: ""
+    O4.1:
+      title: "General appearance and physical properties"
+      description: "Terms relating to general appearance/physical properties"
+    O4.2:
+      title: "Judgement of appearance (pretty etc.)"
+      description: "Descriptive terms relating to the appearance/look of X"
+    O4.3:
+      title: "Colour and colour patterns"
+      description: "Terms depicting colour and other visual attributes"
+    O4.4:
+      title: "Shape"
+      description: "Terms relating to shapes/the shape of X"
+    O4.5:
+      title: "Texture"
+      description: "Terms depicting texture"
+    O4.6:
+      title: "Temperature"
+      description: "Terms relating to temperature"
+P:
+  P1:
+    title: "Education in general"
+    description: "Terms relating to education in general"
+Q:
+  Q1:
+    title: "Substances and materials generally"
+    description: ""
+    Q1.1:
+      title: "Communication in general"
+      description: "Terms relating to communication in general"
+    Q1.2:
+      title: "Paper documents and writing"
+      description: "Terms relating to written communication (including writing/printing implements and documentation)"
+    Q1.3:
+      title: "Telecommunications"
+      description: "Terms relating to telecommunications"
+  Q2:
+    title: "Speech acts"
+    description: ""
+    Q2.1:
+      title: "Speech etc: Communicative"
+      description: "Terms relating to spoken communication"
+    Q2.2:
+      title: "Speech acts"
+      description: "Speech acts terms"
+  Q3:
+    title: "Language, speech and grammar"
+    description: "Terms relating to language (including linguistic/grammatical terms)"
+  Q4:
+    title: "The Media"
+    description: "General terms relating to the media"
+    Q4.1:
+      title: "The Media: Books"
+      description: "Media terms relating to (types of) books, and their production"
+    Q4.2:
+      title: "The Media: Newspapers etc."
+      description: "Media terms relating to (types of) newspapers, and their production"
+    Q4.3:
+      title: "The Media: TV, Radio & Cinema"
+      description: "Media terms specifically relating to TV, Radio and the Cinema"
+S:
+  S1:
+    S1.1:
+      S1.1.1:
+        title: "General"
+        description: "Terms relating to social actions, state and processes in general"
+      S1.1.2:
+        title: "Reciprocity"
+        description: "Terms relating to the exchange of X/lack of exchange between (groups of) people"
+      S1.1.3:
+        title: "Participation"
+        description: "Terms relating to participation/involvement, or the lack of"
+      S1.1.4:
+        title: "Deserve etc."
+        description: "Terms relating to entitlement/eligibility/merit, etc."
+    S1.2:
+      title: "Personality traits"
+      description: "Terms depicting personality traits/characteristics"
+      S1.2.1:
+        title: "Approachability and Friendliness"
+        description: "Terms depicting (level of) approachability/friendliness"
+      S1.2.2:
+        title: "Avarice"
+        description: "Terms depicting (level of) avarice/generosity"
+      S1.2.3:
+        title: "Egoism"
+        description: "Terms depicting (level of) egoism"
+      S1.2.4:
+        title: "Politeness"
+        description: "Terms depicting (level of) politeness"
+      S1.2.5:
+        title: "Toughness; strong/weak"
+        description: "Terms depicting (level of) strength/weakness"
+      S1.2.6:
+        title: "Sensible"
+        description: "Terms depicting (level of) sensibleness/absurdity"
+  S2:
+    title: "People"
+    description: "Term indicating that particular words relate to/denote people – e.g. students"
+    S2.1:
+      title: "People: Female"
+      description: "Terms relating to females"
+    S2.2:
+      title: "People: Male"
+      description: "Terms relating to males"
+  S3:
+    title: "Relationship"
+    description: ""
+    S3.1:
+      title: "Relationship: General"
+      description: "Terms relating to relationships in general"
+    S3.2:
+      title: "Relationship: Intimate/sexual"
+      description: "Terms relating to relationships that are intimate and/or sexual, or to a person’s sexual orientation."
+  S4:
+    title: "Kin"
+    description: "Terms relating to relationships between family members/familiars"
+  S5:
+    title: "Groups and affiliation"
+    description: "Terms relating to groups/the level of association/affiliation between groups"
+  S6:
+    title: "Obligation and necessity"
+    description: "Terms depicting (level of) obligation/necessity"
+  S7:
+    S7.1:
+      title: "Power, organizing"
+      description: "Terms depicting power/authority/influence and organisation/administration"
+    S7.2:
+      title: "Respect"
+      description: "Terms depicting (level of) respect/deference/reverence"
+    S7.3:
+      title: "Competition"
+      description: "Terms depicting competition/rivalry/contest, or the lack of"
+    S7.4:
+      title: "Permission"
+      description: "Terms depicting (level of) permission/consent/authorisation"
+  S8:
+    title: "Helping/hindering"
+    description: "Terms depicting (level of) help/hindrance"
+  S9:
+    title: "Religion and the supernatural"
+    description: "Terms relating to religions and the supernatural"
+T:
+  T1:
+    title: "Time"
+    description: ""
+    T1.1:
+      title: "Time: General"
+      description: "Terms relating to time in general"
+      T1.1.1:
+        title: "Time: General: Past"
+        description: "General terms relating to a past (period/point in) time"
+      T1.1.2:
+        title: "Time: General: Present; simultaneous"
+        description: "General terms relating to a present (period/point in) time"
+      T1.1.3:
+        title: "Time: General: Future"
+        description: "General terms relating to a future (period/point in) time"
+    T1.2:
+      title: "Time: Momentary"
+      description: "Terms relating to a momentary/transitory (period/point in) time"
+    T1.3:
+      title: "Time: Period"
+      description: "Terms relating to a specific period of time"
+  T2:
+    title: "Time: Beginning and ending"
+    description: "Terms depicting commencement/completion"
+  T3:
+    title: "Time: Old, new and young; age"
+    description: "Terms relating to age/maturity"
+  T4:
+    title: "Time: Early/late"
+    description: "Terms relating to well-timed-ness"
+W:
+  W1:
+    title: "The universe"
+    description: "Terms relating to the universe/cosmos"
+  W2:
+    title: "Light"
+    description: ""
+  W3:
+    title: "Geographical terms"
+    description: "Geographical terms"
+  W4:
+    title: "Weather"
+    description: "Terms relating to the climate/weather conditions"
+  W5:
+    title: "Green issues"
+    description: "Environmental terms"
+X:
+  X1:
+    title: "General"
+    description: "General terms relating to psychological actions, states and processes"
+  X2:
+    title: "Mental actions and processes"
+    description: "Terms relating to mental actions and processes in general"
+    X2.1:
+      title: "Thought, belief"
+      description: "Terms relating to reasoning/thinking, and level of belief/sceptism"
+    X2.2:
+      title: "Knowledge"
+      description: "Terms relating to (level) of knowledge/perception/retrospection"
+    X2.3:
+      title: "Learn"
+      description: "Terms relating to (level of) learning/mastery/deduction/realisation"
+    X2.4:
+      title: "Investigate, examine, test, search"
+      description: "Terms relating to investigation/examination"
+    X2.5:
+      title: "Understand"
+      description: "Terms depicting (level of) understanding/comprehension"
+    X2.6:
+      title: "Expect"
+      description: "Terms depicting (level of) expectation"
+  X3:
+    title: "Sensory"
+    description: ""
+    X3.1:
+      title: "Sensory: Taste"
+      description: "Sensory terms relating to taste"
+    X3.2:
+      title: "Sensory: Sound"
+      description: "Sensory terms relating to sound"
+    X3.3:
+      title: "Sensory: Touch"
+      description: "Sensory terms relating to touch"
+    X3.4:
+      title: "Sensory: Sight"
+      description: "Sensory terms relating to sight"
+    X3.5:
+      title: "Sensory: Smell"
+      description: "Sensory terms relating to smell"
+  X4:
+    X4.1:
+      title: "Mental object: Conceptual object"
+      description: "Terms depicting conceptual objects/objects of the mind (e.g. ideas/concepts)"
+    X4.2:
+      title: "Mental object: Means, method"
+      description: "Terms relating to mental practises/procedures/resources/techniques"
+  X5:
+    X5.1:
+      title: "Attention"
+      description: "Terms relating to the (level of) attention"
+    X5.2:
+      title: "Interest/boredom/excited/energetic"
+      description: "Terms depicting (level of) interest/energy/boredom, etc"
+  X6:
+    title: "Deciding"
+    description: "Terms relating to decisions/decision making, or lack of"
+  X7:
+    title: "Wanting; planning; choosing"
+    description: "Terms depicting (level of) desire/aspiration"
+  X8:
+    title: "Trying"
+    description: "Terms depicting (level of) effort/resolution"
+  X9:
+    title: "Ability"
+    description: ""
+    X9.1:
+      title: "Ability: Ability, intelligence"
+      description: "Terms depicting (level of) ability/intelligence"
+    X9.2:
+      title: "Ability: Success and failure"
+      description: "Terms depicting (level of) success/failure"
+Y:
+  Y1:
+    title: "Science and technology in general"
+    description: "Terms relating to science and technology"
+  Y2:
+    title: "Information technology and computing"
+    description: "Terms relating to information technology and computing"
+Z:
+  Z0:
+    title: "Unmatched proper noun"
+    description: ""
+  Z1:
+    title: "Personal names"
+    description: "Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)"
+  Z2:
+    title: "Geographical names"
+    description: "Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)"
+  Z3:
+    title: "Other proper names"
+    description: "Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)"
+  Z4:
+    title: "Discourse Bin"
+    description: "Discourse markers, emphatic communication terms"
+  Z5:
+    title: "Grammatical bin"
+    description: "Prepositions/adverbs/conjunctions, etc"
+  Z6:
+    title: "Negative"
+    description: "Negative particles"
+  Z7:
+    title: "If"
+    description: "Conditional terms"
+  Z8:
+    title: "Pronouns etc."
+    description: "Pronouns (standard and colloquial)"
+  Z9:
+    title: "Trash can"
+    description: ""
+  Z99:
+    title: "Unmatched"
+    description: "Mis-spellings or words that have not been included in the lexicon as yet"
+    
+  
