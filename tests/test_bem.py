@@ -22,6 +22,7 @@ class TestBEM:
             "base_model": None
         }
         model = BEM(**bem_kwargs)  # type: ignore
+        model.eval()
         return model
 
     def test__get_base_model(self) -> None:
@@ -129,20 +130,39 @@ class TestBEM:
                 token_embeddings, token_attention_mask
             )
 
-    def test_forward_with_no_masking(self, bem_model: BEM) -> None:
+    @torch.inference_mode(mode=True)
+    @pytest.mark.parametrize("text_token_masking", [True, False])
+    @pytest.mark.parametrize("text_word_ids_masking", [True, False])
+    @pytest.mark.parametrize("label_definitions_attention_masking", [True, False])
+    def test_forward_with_no_masking(self, bem_model: BEM,
+                                     text_token_masking: bool,
+                                     text_word_ids_masking: bool,
+                                     label_definitions_attention_masking: bool) -> None:
         # B = 3 T = 4 S = 2 ST = 5
         # B x T
         text_input_ids = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8], [1, 2, 3, 4]])
+        
         text_attention_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        if text_token_masking:
+            text_attention_mask = torch.tensor([[1, 1, 1, 0], [1, 1, 1, 1], [1, 1, 1, 1]])
+        
         text_word_ids_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        if text_word_ids_masking:
+            text_word_ids_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 0, 1, 1]])
         
         # B x S x ST
         label_definitions_input_ids = torch.tensor([[[1, 2, 3, 4, 5], [4, 5, 6, 7, 8]],
                                                     [[7, 8, 9, 10, 11], [10, 11, 12, 13, 14]],
                                                     [[1, 2, 3, 4, 5], [4, 5, 6, 7, 8]]])
+        
         label_definitions_attention_mask = torch.tensor([[[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
                                                          [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
                                                          [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]])
+        if label_definitions_attention_masking:
+            label_definitions_attention_mask = torch.tensor([[[1, 1, 1, 1, 1], [0, 0, 0, 0, 0]],
+                                                             [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+                                                             [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]])
+
         # B x S
         expected_output_shape = (3, 2)
         expected_output_dtype = torch.float32
@@ -154,6 +174,16 @@ class TestBEM:
         assert result.shape == expected_output_shape
         assert result.dtype == expected_output_dtype
         assert math.fabs(result.sum().item()) > 0.0
-        torch.testing.assert_close(result[0], result[2])
+
+        if label_definitions_attention_masking:
+            assert result[0][1].item() == 0.0
+        else:
+            assert result[0][1].item() > 0.0
+
+        if text_token_masking or text_word_ids_masking or label_definitions_attention_masking:
+            with pytest.raises(AssertionError):
+                torch.testing.assert_close(result[0], result[2])
+        else:
+            torch.testing.assert_close(result[0], result[2])
         with pytest.raises(AssertionError):
             torch.testing.assert_close(result[0], result[1])
