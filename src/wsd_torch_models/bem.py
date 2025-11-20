@@ -32,6 +32,50 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
     using the word(s) text context, e.g. whole sentence or document and it will
     encode every sense definition given and return the most similar sense definition
     for the given word(s).
+
+    Unlike the original BEM model we use the same model to encode both the
+    text to disambiguate and the label definitions.
+
+    The layers of the model that encode all tokens (text to disambiguate and the
+    label definitions) is first the `base_model` and then optionally followed
+    by the `linear_bridge` and `token_model_layers`. The `base_model` may encode
+    the text using either the final layer of the base model or a ScalarMix.
+
+    Attributes:
+        base_model (transformers.PreTrainedModel): The base model to encode the word(s) to
+            disambiguate using the word(s) text context. This is used for both
+            the text that is to be disambiguated and the label definitions.
+        base_model_hidden_size (int): The hidden dimension size of the
+            `base_model`.
+        base_model_number_hidden_layers (int): The number of hidden layers in
+            the `base_model`.
+        base_model_name (str): The name of the HuggingFace base model
+            to use, e.g. FacebookAI/roberta-base.
+        freeze_base_model (bool): (Ignore as it is only relevant for training
+            the base model).
+            Whether the base model should not be trained
+        add_scalar_mixer (bool): Whether to use a ScalarMix to generate a
+            base model hidden state rather than using the base model's final
+            layer as the hidden state.
+        scalar_mix_layer_norm (bool): Whether the scalar mixer should normalise
+            its output.
+        number_transformer_encoder_layers (int): The number of transformer encoder
+            layers to use. Can be 0, when 0 then the following two attributes
+            are ignore, `transformer_encoder_hidden_dim` and `transformer_encoder_num_heads`
+            even if they contain a value.
+        transformer_encoder_hidden_dim (int): The hidden dimension size of the
+            transformer encoder.
+        transformer_encoder_num_heads (int): The number of heads in the
+            transformer encoder.
+        linear_bridge (torch.nn.Linear | None): A linear layer to bridge the
+            output of the base model and the input of the first transformer encoder
+            within the `token_model_layers`.
+            This is None when `number_transformer_encoder_layers` is 0 or when
+            the output dimension of the base model is the same as the input
+            dimension of the transformer encoder.
+        token_model_layers (torch.nn.Sequential | None): A list of transformer encoder
+            layers to further encode tokens after the base model layers.
+            This is None when `number_transformer_encoder_layers` is 0.
     """
 
     @staticmethod
@@ -144,7 +188,6 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         self.transformer_encoder_hidden_dim = transformer_encoder_hidden_dim
         self.transformer_encoder_num_heads = transformer_encoder_num_heads
         self.linear_bridge: torch.nn.Linear | None = None
-        self.transformer: torch.nn.TransformerEncoder | None = None
 
         if self.number_transformer_encoder_layers:
             logger.info(
@@ -429,6 +472,26 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                                   label_definitions_input_ids: torch.Tensor,
                                   label_definitions_attention_mask: torch.Tensor,
                                   ) -> torch.Tensor:
+        """
+        Encodes the label definitions given their token ids and attention mask.
+        This returns an encoding per label definition and not per token.
+
+        Args:
+            label_definitions_input_ids (torch.Tensor): The label definition token IDs to
+                embed. torch.Long.
+                Shape(Batch, Largest number of label definitions (S),
+                Sequence length (ST)).
+            label_definitions_attention_mask (torch.Tensor): The attention
+                mask associated with the token IDs. torch.Long.
+                Shape(Batch, Largest number of label definitions (S),
+                Sequence length (ST)).
+        Returns:
+            torch.Tensor: A contextualised embedding for each label definition.
+                Label definitions that are not relevant (padded) are ignored
+                as they will have an embedding of zero (zero values).
+                torch.Float. Shape (Batch, Largest number of label definitions (S),
+                Embedding Dimension)
+        """
         
         BATCH_SIZE, S, ST = label_definitions_input_ids.shape
 
@@ -453,8 +516,19 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                       text_input_ids: torch.Tensor,
                       text_attention_mask: torch.Tensor,
                       ) -> torch.Tensor:
-        # Encoding the text sequence
-        # Shape (B, D)
+        """
+        Encodes the text sequence using the token encoding model/layers.
+        
+        Args:
+            text_input_ids (torch.Tensor): The token IDs to embed. torch.Long.
+                Shape (Batch, Sequence Length).
+            text_attention_mask (torch.Tensor): The attention mask associated with the token IDs.
+                torch.Long. Shape (Batch, Sequence Length).
+        
+        Returns:
+            torch.Tensor: A contextualised embedding for each text sequence.
+                torch.Float. Shape (Batch, Embedding Dimension)
+        """
         text_encoding = self._token_encoding(text_input_ids, text_attention_mask)
         return text_encoding
     
@@ -462,11 +536,22 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                                            text_encoding: torch.Tensor,
                                            text_word_ids_mask: torch.Tensor
                                            ) -> torch.Tensor:
-        # Expanded so that we have a text embedding per positive sample
-        # Current Shape (Batch, Sequence Length, Dimension)
-        # New Shape (B, M, T, D)
-        # expanded_text_encoding = text_encoding.unsqueeze(1).expand(-1, S, -1, -1)
-        # Shape (B, D)
+        
+        """
+        Given the text encodings it returns the average embedding for each token
+        within the text word ids mask for each given text encoding in the batch.
+        
+        Args:
+            text_encoding (torch.Tensor): The contextualised embedding for each text sequence.
+                torch.Float. Shape (Batch, Sequence Length, Embedding Dimension).
+            text_word_ids_mask (torch.Tensor): The attention mask associated with the token IDs
+                that make up the average embedding for the given sequence.
+                torch.Long. Shape (Batch, Sequence Length).
+        
+        Returns:
+            torch.Tensor: An average embedding for each token in the IDS for
+            each given text encoding. torch.Float. Shape (Batch, Embedding Dimension)
+        """
         average_text_encoding = self._average_token_embedding_pooling(
             text_encoding, text_word_ids_mask
         )
@@ -477,13 +562,27 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                             text_attention_mask: torch.Tensor,
                             text_word_ids_mask: torch.Tensor
                             ) -> torch.Tensor:
-        # Encoding the text sequence
-        # Shape (B, D)
+        """
+        Encoding the text sequence with the token encoding and then
+        pooling the token embeddings with the attention mask to get the
+        average embedding for each token which is used to calculate the
+        similarity with the label definitions.
+
+        Args:
+            text_input_ids (torch.Tensor): The token IDs to embed. torch.Long.
+                Shape (BATCH, SEQUENCE).
+            text_attention_mask (torch.Tensor): The attention mask associated
+                with the token IDs. torch.Long. Shape (BATCH, SEQUENCE).
+            text_word_ids_mask (torch.Tensor): The attention mask associated
+                with the token IDs. torch.Long. Shape (BATCH, SEQUENCE).
+
+        Returns:
+            torch.Tensor: The average token embeddings pooled over each sequence
+                in the batch taking into account the attention mask. torch.Float.
+                Shape (BATCH, D).
+        """
+        # Shape (B, S, D)
         text_encoding = self._token_encoding(text_input_ids, text_attention_mask)
-        # Expanded so that we have a text embedding per positive sample
-        # Current Shape (Batch, Sequence Length, Dimension)
-        # New Shape (B, M, T, D)
-        # expanded_text_encoding = text_encoding.unsqueeze(1).expand(-1, S, -1, -1)
         # Shape (B, D)
         average_text_encoding = self._average_token_embedding_pooling(
             text_encoding, text_word_ids_mask
@@ -493,8 +592,25 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
     def token_label_similarity(self,
                                label_definition_embedding: torch.Tensor,
                                token_text_embedding: torch.Tensor) -> torch.Tensor:
-        # Expand the text encoding so that we can get token similarity for each
-        # label definition
+        """
+        Calculates the similarity score between each label definition and a given
+        token encoding. This is used to determine which label definition is the
+        most similar to a given token.
+
+        Label definitions that are not relevant (padded) are ignored as they
+        will have a similarity score of zero.
+
+        Args:
+            label_definition_embedding (torch.Tensor): The contextualised embedding of
+                the label definitions. Shape (Batch, Largest number of label definitions (S),
+                Embedding Dimension).
+            token_text_embedding (torch.Tensor): The contextualised embedding of the
+                token. Shape (Batch, Embedding Dimension).
+
+        Returns:
+            torch.Tensor: The similarity score between each label definition and the token
+                encoding. Shape (Batch, Largest number of label definitions (S))
+        """
         expanded_average_text_encoding = token_text_embedding.unsqueeze(-1)
         expanded_similarity_score = torch.matmul(label_definition_embedding, expanded_average_text_encoding)
         similarity_score = expanded_similarity_score.squeeze(-1)
@@ -512,11 +628,13 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         Finds the most similar label definition for the given text word ids
         which are contextualised by itself and it's surrounding text (`text_input_ids`).
 
-        B represents the batch size. This is the number of text sequences.
-        S represents the largest number of label definitions within one text
+        Tensor dimension definitions:
+
+        B: represents the batch size. This is the number of text sequences.
+        S: represents the largest number of label definitions within one text
             sequence within the batch.
-        T represents the largest token length for the text sample.
-        ST represents the largest token length for the label definitions sentences.
+        T: represents the largest token length for the text sample.
+        ST: represents the largest token length for the label definitions sentences.
         
         Args:
             text_input_ids (torch.Tensor): Tokenized text sample
