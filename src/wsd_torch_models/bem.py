@@ -5,13 +5,16 @@ import os
 from pathlib import Path
 import tempfile
 from typing import Any, Optional, Union
+import json
 
 from huggingface_hub import PyTorchModelHubMixin, constants
 from huggingface_hub.errors import EntryNotFoundError
 from huggingface_hub.file_download import hf_hub_download
 from safetensors.torch import save_model as save_model_as_safetensor
+from safetensors.torch import save_file as save_safetensors
+from safetensors.torch import load_file as load_safetensors
 import torch
-from transformers import AutoConfig, AutoModel, PreTrainedModel
+from transformers import AutoConfig, AutoModel, PreTrainedModel, PreTrainedTokenizerBase
 from transformers.modeling_outputs import BaseModelOutput
 
 from wsd_torch_models.scalar_mix import ScalarMix
@@ -76,6 +79,18 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         token_model_layers (torch.nn.Sequential | None): A list of transformer encoder
             layers to further encode tokens after the base model layers.
             This is None when `number_transformer_encoder_layers` is 0.
+        inference_ready (bool): Whether the model is ready for inference.
+            This is based on whether the `label_definition_embeddings`,
+            `label_to_definition` and `embedding_index_to_label` attributes
+            have been set. These can be set by calling the method
+            `embed_and_set_label_definitions` or at initialisation if the
+            `label_definitions_directory_path` is not None.
+        label_definition_embeddings (torch.Tensor | None): The embeddings
+            of the label/senses definitions.
+        label_to_definition (dict[str, str] | None): A dictionary mapping
+            labels/senses to their definitions.
+        embedding_index_to_label (dict[int, str] | None): A dictionary mapping
+            embedding indices to labels/senses.
     """
 
     @staticmethod
@@ -114,6 +129,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                  transformer_encoder_num_heads: int = 8,
                  batch_first: bool = True,
                  base_model: PreTrainedModel | None = None,
+                 label_definitions_directory_path: str | os.PathLike | None = None,
                  **kwargs: Any
                  ) -> None:
         """
@@ -144,6 +160,15 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 downloading the base model using the `base_model_name` this
                 is used instead as the base_model, this is required for loading
                 the model using `from_pretrained`. Default is None.
+            label_definitions_directory_path (str | os.PathLike | None): The path
+                to the directory containing the label definitions data. This data
+                should include the sense labels to their definitions, the
+                embedded definitions, and the embedding index to the sense
+                labels, this data should be saved to the following file names
+                within this directory: `label_to_definition.json`,
+                `label_definitions_embeddings.safetensors` and
+                `embedding_index_to_label.json`. Default is None, if this is
+                not `None` then the attribute `inference_ready` is set to True.
             **kwargs (Any): This is required for the `from_pretrained` method,
                 all of these `kwargs` are ignored.
 
@@ -221,6 +246,49 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             self.token_model_layers = torch.nn.Sequential(
                 OrderedDict(token_model_layers_list)
             )
+        
+        self.inference_ready = False
+        self.label_definition_embeddings: torch.Tensor | None = None
+        self.label_to_definition: dict[str, str] | None = None
+        self.embedding_index_to_label: dict[int, str] | None = None
+        if label_definitions_directory_path:
+            label_definitions_embeddings_path = Path(label_definitions_directory_path,
+                                                     "label_definitions_embeddings.safetensors")
+            label_definitions_tensor_dict = load_safetensors(label_definitions_embeddings_path)
+            if "label_definitions_embeddings" in label_definitions_tensor_dict:
+                self.label_definition_embeddings = label_definitions_tensor_dict[
+                    "label_definitions_embeddings"
+                ]
+            else:
+                raise ValueError(
+                    "Could not find label_definitions_embeddings in the "
+                    f"SAFETENSORS file: {label_definitions_embeddings_path}"
+                )
+            label_to_definition_path = Path(label_definitions_directory_path,
+                                            "label_to_definition.json")
+            with label_to_definition_path.open("r", encoding="utf-8") as read_fp:
+                self.label_to_definition = json.load(read_fp)
+            embedding_index_to_label_path = Path(label_definitions_directory_path,
+                                                 "embedding_index_to_label.json")
+            with embedding_index_to_label_path.open("r", encoding="utf-8") as read_fp:
+                self.embedding_index_to_label = json.load(read_fp)
+            self.inference_ready = True
+
+
+    def embed_and_set_label_definitions(self,
+                                        label_definitions: dict[str, str],
+                                        tokenizer: PreTrainedTokenizerBase) -> None:
+        """
+        Embeds the label definitions using the `base_model` and returns the
+        embeddings.
+
+        Args:
+            label_definitions (list[str]): The label definitions to embed.
+
+        Returns:
+            None
+        """
+        return self.base_model(label_definitions)
 
     def _save_pretrained(self, save_directory: Path) -> None:
         """
@@ -243,6 +311,22 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         save_model_as_safetensor(model_to_save, str(save_directory / constants.SAFETENSORS_SINGLE_FILE))  # type: ignore [arg-type]
         auto_model_config = self.base_model.config
         auto_model_config.save_pretrained(str(save_directory / "base_model_config"))
+        if self.inference_ready:
+            logger.info("Saving label definitions embeddings, label definitions and embeddings index.")
+            label_definitions_directory_path = save_directory / "label_definitions"
+            label_definitions_directory_path.mkdir(parents=True, exist_ok=True)
+            
+            label_definition_embedding_dict = {"label_definitions_embeddings": self.label_definition_embeddings}
+            label_definition_embedding_path = label_definitions_directory_path / "label_definitions_embeddings.safetensors"
+            save_safetensors(label_definition_embedding_dict, label_definition_embedding_path)
+            
+            label_to_definition_path = label_definitions_directory_path / "label_to_definition.json"
+            with label_to_definition_path.open("w", encoding="utf-8") as write_fp:
+                json.dump(self.label_to_definition, write_fp)
+            
+            embedding_index_to_label_path = label_definitions_directory_path / "embedding_index_to_label.json"
+            with embedding_index_to_label_path.open("w", encoding="utf-8") as write_fp:
+                json.dump(self.embedding_index_to_label, write_fp)
 
     @classmethod
     def _from_pretrained(
