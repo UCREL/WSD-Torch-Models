@@ -1,14 +1,34 @@
+import argparse
 from pathlib import Path
 
-from safetensors.torch import save_file
-import torch
-from transformers import AutoConfig, AutoModel, AutoTokenizer
 from huggingface_hub import ModelCard
+import torch
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from wsd_torch_models.bem import BEM
+from wsd_torch_models.data_utils import load_usas_mapper
+
+
+def generate_bem_readme(readme_template_path: Path) -> str:
+    with readme_template_path.open("r", encoding="utf-8") as fp:
+        content = fp.read()
+        return content
+
 
 
 if __name__ == "__main__": 
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("readme_template_path", type=Path, help="File path to the models README template")
+    args = parser.parse_args()
+    content = generate_bem_readme(args.readme_template_path)
+
+    usas_tags_to_filter_out = set([
+        "Z99"
+    ])
+    hf_repoistory_id = "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM"
+    hf_repoistory_branch = "main"
+    repoistory_type = "model"
     model_checkpoint = Path("./checkpoints/model-step=532637-validation_accuracy=0.99394.ckpt")
     torch_lightning_checkpoint = torch.load(model_checkpoint)
 
@@ -27,81 +47,17 @@ if __name__ == "__main__":
         for hyper_parameter_key in hyper_parameters_keys
     }
     wsd_model = BEM(**hyper_parameters_dict)
+    import pdb
+    pdb.set_trace()
+    raise ValueError()
     wsd_model.load_state_dict(torch_lightning_checkpoint["state_dict"])
     tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"])
+    assert isinstance(tokenizer, PreTrainedTokenizerBase)
+    label_definitions =load_usas_mapper(tags_to_filter_out=usas_tags_to_filter_out)
+    wsd_model.embed_and_set_label_definitions(label_definitions, tokenizer)
     
-    hf_repoistory_id = "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM"
-    hf_repoistory_branch = "main"
+    
     wsd_model.push_to_hub(hf_repoistory_id, branch=hf_repoistory_branch)
-    tokenizer.push_to_hub(hf_repoistory_id, branch=hf_repoistory_branch)
+    tokenizer.push_to_hub(hf_repoistory_id, revision=hf_repoistory_branch)
     card = ModelCard(content)
-
-
-
-      
-  
-
-
-"""
----
-license: cc-by-nc-sa-4.0
-base_model: jhu-clsp/ettin-encoder-17m
-base_model_relation: finetune
-datasets:
-- ucrelnlp/English-USAS-Mosaico
-language:
-- en
-tags:
-- model_hub_mixin
-- pytorch_model_hub_mixin
-- pytorch
-- word-sense-disambiguation
-- lexical-semantics
----
-
-# Model Card for PyMUSAS Neural English Small BEM
-
-A fine tuned 17 million parameter English ModernBERT architecture semantic tagger. The tagger outputs semantic tags at the token level from the [USAS tagset](https://ucrel.lancs.ac.uk/usas/usas_guide.pdf).
-
-The semantic tagger is a variation of the [Bi-Encoder Model (BEM) from Blevins and Zettlemoyer 2020](https://aclanthology.org/2020.acl-main.95.pdf) a Word Sense Disambiguation (WSD) model.
-
-## Table of contents
-
-## Quick start
-
-### Installation
-
-### Usage
-
-## Model Description
-
-### Model Sources
-
-- Training Repository:
-- Inference/Usage Respoistory:
-
-### Model Architecture
-
-| Parameter | 17M English | 68M English | 140M Multilingual | 307M Multilingual |
-|:----------|:----|:----|:----|:-----|
-| Layers | 7 | 19 | 22 | 22 |
-| Hidden Size | 256 | 512 | 384 | 768 |
-| Intermediate Size | 384 | 768 | 1152 | 1152 |
-| Attention Heads | 4 | 8 | 6 | 12 |
-| Total Parameters | 17M | 68M | 140M | 307M |
-| Non-embedding Parameters | 42M | 110M |
-| Max Sequence Length | 8,000 | 8,000 | 8,192 | 8,192 |
-| Vocabulary Size | 50,368 | 50,368 | 256,000 | 256,000 |
-| Tokenizer | ModernBERT | ModernBERT | Gemma 2 | Gemma 2 |
-
-## Training Data
-
-## Contact Information
-
-The scripts described in this README allow you to train a variation of the [Bi-Encoder Model (BEM) from Blevins and Zettlemoyer 2020](https://aclanthology.org/2020.acl-main.95.pdf) a Word Sense Disambiguation (WSD) model. The only difference between the original and this version is that this version ties the weights of the context and gloss encoder. The model is trained to find the most relevant gloss/description for a given contextualised token that is to be disambiguated. The description comes from the semantic tagset, which in this case is USAS, whereby the description describes a semantic tag.
-
-This model has been pushed to the Hub using the [PytorchModelHubMixin](https://huggingface.co/docs/huggingface_hub/package_reference/mixins#huggingface_hub.PyTorchModelHubMixin) integration:
-- Code: [More Information Needed]
-- Paper: [More Information Needed]
-- Docs: [More Information Needed]
-"""
+    card.push_to_hub(hf_repoistory_id, repo_type=repoistory_type, revision=hf_repoistory_branch)

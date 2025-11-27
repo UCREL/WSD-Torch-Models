@@ -1,21 +1,23 @@
 from collections import OrderedDict
 import inspect
+import json
 import logging
 import os
 from pathlib import Path
-import tempfile
-from typing import Any, Optional, Union
-import json
+from typing import Any, Optional, Union, overload
+import warnings
 
 from huggingface_hub import PyTorchModelHubMixin, constants
 from huggingface_hub.errors import EntryNotFoundError
 from huggingface_hub.file_download import hf_hub_download
-from safetensors.torch import save_model as save_model_as_safetensor
-from safetensors.torch import save_file as save_safetensors
 from safetensors.torch import load_file as load_safetensors
+from safetensors.torch import save_file as save_safetensors
+from safetensors.torch import save_model as save_model_as_safetensor
 import torch
-from transformers import AutoConfig, AutoModel, PreTrainedModel, PreTrainedTokenizerBase
+from torch._prims_common import DeviceLikeType
+from transformers import AutoConfig, AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 from transformers.modeling_outputs import BaseModelOutput
+from typing_extensions import Self
 
 from wsd_torch_models.scalar_mix import ScalarMix
 from wsd_torch_models.utils import tiny_value_of_dtype
@@ -130,6 +132,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                  batch_first: bool = True,
                  base_model: PreTrainedModel | None = None,
                  label_definitions_directory_path: str | os.PathLike | None = None,
+                 # model_type: str = "modernbert",
                  **kwargs: Any
                  ) -> None:
         """
@@ -254,7 +257,14 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         if label_definitions_directory_path:
             label_definitions_embeddings_path = Path(label_definitions_directory_path,
                                                      "label_definitions_embeddings.safetensors")
-            label_definitions_tensor_dict = load_safetensors(label_definitions_embeddings_path)
+            if not label_definitions_embeddings_path.exists():
+                raise FileNotFoundError(
+                    f"Could not find the label definitions embeddings SAFETENSORS file: "
+                    f"in the directory: {label_definitions_directory_path} "
+                    f"files in the directory: {list(Path(label_definitions_directory_path).iterdir())}"
+                )
+            label_definitions_tensor_dict = load_safetensors(label_definitions_embeddings_path,
+                                                             device=str(self.base_model.device))
             if "label_definitions_embeddings" in label_definitions_tensor_dict:
                 self.label_definition_embeddings = label_definitions_tensor_dict[
                     "label_definitions_embeddings"
@@ -271,24 +281,65 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             embedding_index_to_label_path = Path(label_definitions_directory_path,
                                                  "embedding_index_to_label.json")
             with embedding_index_to_label_path.open("r", encoding="utf-8") as read_fp:
-                self.embedding_index_to_label = json.load(read_fp)
+                self.embedding_index_to_label = {int(embedding_index): label
+                                                 for embedding_index, label in json.load(read_fp).items()}
             self.inference_ready = True
-
 
     def embed_and_set_label_definitions(self,
                                         label_definitions: dict[str, str],
                                         tokenizer: PreTrainedTokenizerBase) -> None:
         """
-        Embeds the label definitions using the `base_model` and returns the
-        embeddings.
+        Tokenizes the label definitions using the `tokenizer` and
+        embeds the label definitions using the `label_definition_encoding` method.
+        The embedded label definitions are then saved self.label_definition_embeddings.
+
+        This will set the following attributes:
+        inference_ready (bool): True
+        label_definition_embeddings (torch.Tensor): The embeddings of the label/senses definitions.
+        label_to_definition (dict[str, str]): A dictionary mapping
+            labels/senses to their definitions.
+        embedding_index_to_label (dict[int, str]): A dictionary mapping
+            embedding indices to labels/senses.
+
+        NOTE: we recommend set the model to evaluation mode and running this
+        method within a `torch.inference_mode` context. e.g.
+        
+        ``` python
+        model.eval()
+        with torch.inference_mode():
+            model.embed_and_set_label_definitions(label_definitions, tokenizer)
+        ```
 
         Args:
-            label_definitions (list[str]): The label definitions to embed.
+            label_definitions (dict[str, str]): The label definitions to embed.
+            tokenizer (PreTrainedTokenizerBase): The tokenizer to use to tokenize
+                the label definitions.
 
         Returns:
             None
         """
-        return self.base_model(label_definitions)
+        label_definition_embeddings_list: list[torch.Tensor] = []
+        embedding_index_to_label: dict[int, str] = {}
+        
+        for index, label_definition in enumerate(label_definitions.items()):
+            label, definition = label_definition
+            tokenized_definition = tokenizer(definition, return_tensors="pt", padding=False, truncation=False)
+            tokenized_definition_input_ids: torch.Tensor = tokenized_definition.input_ids.to(self.base_model.device).unsqueeze(0)
+            tokenized_definition_attention_mask: torch.Tensor = tokenized_definition.attention_mask.to(self.base_model.device).unsqueeze(0)
+
+            definition_embedding = self.label_definition_encoding(tokenized_definition_input_ids,
+                                                                  tokenized_definition_attention_mask)
+            label_definition_embeddings_list.append(definition_embedding)
+            embedding_index_to_label[index] = label
+        
+        label_definition_embeddings = torch.vstack(label_definition_embeddings_list)
+        NUM_DESC, DESC_BATCH, EMBEDDING_DIM = label_definition_embeddings.shape
+        label_definition_embeddings = label_definition_embeddings.view(DESC_BATCH, NUM_DESC, EMBEDDING_DIM)
+        
+        self.inference_ready = True
+        self.label_definition_embeddings = label_definition_embeddings
+        self.label_to_definition = label_definitions
+        self.embedding_index_to_label = embedding_index_to_label
 
     def _save_pretrained(self, save_directory: Path) -> None:
         """
@@ -316,6 +367,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             label_definitions_directory_path = save_directory / "label_definitions"
             label_definitions_directory_path.mkdir(parents=True, exist_ok=True)
             
+            assert self.label_definition_embeddings is not None
             label_definition_embedding_dict = {"label_definitions_embeddings": self.label_definition_embeddings}
             label_definition_embedding_path = label_definitions_directory_path / "label_definitions_embeddings.safetensors"
             save_safetensors(label_definition_embedding_dict, label_definition_embedding_path)
@@ -378,12 +430,16 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             **model_kwargs (Any): The arguments to pass to the model to initialise
                 the model. Please note that the `base_model` argument is passed
                 by this method internally as we load the `base_model` within this
-                method.
+                method. Also note that the `label_definitions_directory_path` argument
+                is also passed by this method internally if the Path exists, the
+                Path should be at `model_id/label_definitions`.
             
         Returns:
             None
         """
         config_directory_name = "base_model_config"
+        label_definitions_directory_name = "label_definitions"
+        
         if os.path.isdir(model_id):
             logger.info("Loading weights from local directory")
             model_file = os.path.join(model_id, constants.SAFETENSORS_SINGLE_FILE)
@@ -391,26 +447,58 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             auto_model_config = AutoConfig.from_pretrained(auto_model_config_directory)
             auto_model = AutoModel.from_config(auto_model_config)  # type: ignore
             model_kwargs["base_model"] = auto_model
+
+            label_definitions_directory_path = Path(os.path.join(model_id, label_definitions_directory_name))
+            if label_definitions_directory_path.is_dir():
+                model_kwargs["label_definitions_directory_path"] = label_definitions_directory_path
+            
             model = cls(**model_kwargs)
             return cls._load_as_safetensor(model, model_file, map_location, strict)
         else:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_model_config_directory = Path(temp_dir, config_directory_name)
-                auto_model_config = hf_hub_download(
-                    repo_id=model_id,
-                    filename="config.json",
-                    revision=revision,
-                    cache_dir=cache_dir,
-                    force_download=force_download,
-                    token=token,
-                    local_files_only=local_files_only,
-                    subfolder=config_directory_name,
-                    local_dir=temp_model_config_directory
-                )
-                temp_model_config_directory_str = str(temp_model_config_directory.resolve())
-                auto_model_config = AutoConfig.from_pretrained(temp_model_config_directory_str)
-                auto_model = AutoModel.from_config(auto_model_config)  # type: ignore
-                model_kwargs["base_model"] = auto_model
+            auto_model_config_file = hf_hub_download(
+                repo_id=model_id,
+                filename="config.json",
+                revision=revision,
+                cache_dir=cache_dir,
+                force_download=force_download,
+                token=token,
+                local_files_only=local_files_only,
+                subfolder=config_directory_name,
+                repo_type="model"
+            )
+            auto_model_config = AutoConfig.from_pretrained(auto_model_config_file)
+            auto_model = AutoModel.from_config(auto_model_config)  # type: ignore
+            model_kwargs["base_model"] = auto_model
+  
+            try:
+                files_to_download = [
+                    "label_definitions_embeddings.safetensors",
+                    "label_to_definition.json",
+                    "embedding_index_to_label.json"
+                ]
+                file_downloaded_folder: Path | None = None
+                for file_name in files_to_download:
+                    file_name_path = hf_hub_download(
+                        repo_id=model_id,
+                        filename=file_name,
+                        revision=revision,
+                        cache_dir=cache_dir,
+                        force_download=force_download,
+                        token=token,
+                        local_files_only=local_files_only,
+                        subfolder=label_definitions_directory_name,
+                        repo_type="model"
+                    )
+                    if file_downloaded_folder is None:
+                        file_downloaded_folder = Path(file_name_path).parent
+                assert file_downloaded_folder is not None
+                downloaded_label_definitions_directory_path = str(file_downloaded_folder.resolve())
+                model_kwargs["label_definitions_directory_path"] = downloaded_label_definitions_directory_path
+                
+            except EntryNotFoundError:
+                logging.info(f"Could not find {label_definitions_directory_name} directory "
+                             f"for model {model_id}, thus `inference_ready` "
+                             "will be set to `False`")
 
             model = cls(**model_kwargs)
             try:
@@ -422,6 +510,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                     force_download=force_download,
                     token=token,
                     local_files_only=local_files_only,
+                    repo_type="model"
                 )
                 return cls._load_as_safetensor(model, model_file, map_location, strict)
             except EntryNotFoundError:
@@ -433,6 +522,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                     force_download=force_download,
                     token=token,
                     local_files_only=local_files_only,
+                    repo_type="model"
                 )
                 return cls._load_as_pickle(model, model_file, map_location, strict)
 
@@ -610,8 +700,8 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 torch.Long. Shape (Batch, Sequence Length).
         
         Returns:
-            torch.Tensor: A contextualised embedding for each text sequence.
-                torch.Float. Shape (Batch, Embedding Dimension)
+            torch.Tensor: A contextualised embedding for each token in the text sequence.
+                torch.Float. Shape (Batch, Sequence Length, Embedding Dimension)
         """
         text_encoding = self._token_encoding(text_input_ids, text_attention_mask)
         return text_encoding
@@ -753,3 +843,252 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         similarity_score = self.token_label_similarity(average_definition_token_embeddings, average_text_encoding)
         
         return similarity_score
+    
+    def predict(self,
+                tokens: list[str],
+                sub_word_tokenizer: PreTrainedTokenizerBase | None = None,
+                top_n: int = -1
+                ) -> list[list[str]]:
+        """
+        Predicts the `top_n` sense labels per token whereby those sense labels
+        can be mapped to their corresponding sense definitions.
+
+        NOTE: we recommend that the number of tokens in the list should represent
+        a sentence, in addition the more tokens in the list the more
+        memory the model requires and on CPU at least the more time it will
+        take to predict the sense labels.
+
+        NOTE: we recommend to put the model in evaluation model and to run
+        it within a `torch.inference_mode(mode=True)` context, e.g.
+
+        ``` python
+        model.eval()
+        with torch.inference_mode(mode=True):
+            predictions = model.predict(tokens)
+        ```
+
+        Args:
+            tokens (list[str]): A list of tokens to predict the sense labels for.
+            sub_word_tokenizer (PreTrainedTokenizerBase | None): The sub-word tokenizer
+                used to split the tokens into sub-word tokens that can be used
+                by the model. Default None. If None the tokenizer used
+                is `transformers.AutoTokenizer.from_pretrained(self.base_model_name)`.
+            top_n (int): The number of sense labels to predict. Default -1 which
+                predicts all sense labels. If 0 will raise a ValueError.
+
+        Returns:
+            list[list[str]]: A list of sense labels per token, where the
+                number of sense labels predicted per token is `top_n`.
+
+        Raises:
+            ValueError: If `top_n` is 0 or less than -1.
+            ValueError: If the model does not have the `label_definition_embeddings`
+                attribute set using either the method `embed_and_set_label_definitions`,
+                at initialisation by setting the `label_definitions_directory_path`
+                argument, or by downloading a pre-trained model from the HuggingFace
+                hub.
+        """
+        if not self.inference_ready:
+            raise ValueError(
+                "The model requires the `label_definition_embeddings` attribute "
+                "to be set using either the method `embed_and_set_label_definitions`, "
+                "at initialisation by setting the `label_definitions_directory_path` "
+                "argument, or by downloading a pre-trained model from the HuggingFace "
+                "hub."
+            )
+        if top_n == 0 or top_n < -1:
+            raise ValueError(f"The top_n argument cannot be {top_n}, has to be either "
+                             "-1 or a positive integer > 0.")
+        if sub_word_tokenizer is None:
+            sub_word_tokenizer = AutoTokenizer.from_pretrained(self.base_model_name)  # type: ignore
+            assert isinstance(sub_word_tokenizer, PreTrainedTokenizerBase)
+        model_device = self.base_model.device
+        number_tokens = len(tokens)  # This can be seen as the batch size.
+
+        sub_word_tokens = sub_word_tokenizer(tokens, return_tensors="pt",
+                                             padding=False, truncation=False,
+                                             is_split_into_words=True)
+        sub_word_token_ids: torch.Tensor = sub_word_tokens.input_ids.to(device=model_device)
+        sub_word_attention_mask: torch.Tensor = sub_word_tokens.attention_mask.to(device=model_device)
+        sub_word_ids_to_token_ids: list[int | None] = sub_word_tokens.word_ids()
+        number_subwords = len(sub_word_ids_to_token_ids)
+        
+        output = self.text_encoding(sub_word_token_ids, sub_word_attention_mask)
+
+        word_id_mask: torch.Tensor = torch.zeros((number_tokens, number_subwords),
+                                                 dtype=torch.long,
+                                                 device=model_device)
+        for sub_word_index, token_index in enumerate(sub_word_ids_to_token_ids):
+            if token_index is None:
+                continue
+            word_id_mask[token_index, sub_word_index] = 1
+
+        token_embeddings = self.token_encoding_using_text_encoding(output, word_id_mask)
+        label_similarity_scores = self.token_label_similarity(self.label_definition_embeddings,  # type: ignore
+                                                              token_embeddings)
+        # torch does not support negative indexing like numpy or python does.
+        if top_n == -1:
+            top_n = label_similarity_scores.shape[-1]
+
+        sorted_label_similarity_scores = torch.argsort(label_similarity_scores, dim=-1, descending=True)
+        top_n_label_similarity_scores = sorted_label_similarity_scores[:, :top_n].cpu().tolist()
+
+        predicted_labels: list[list[str]] = []
+        for top_n_label_similarity_score in top_n_label_similarity_scores:
+            predicted_labels.append(
+                [self.embedding_index_to_label[top_n_index]  # type: ignore
+                 for top_n_index in top_n_label_similarity_score]
+            )
+
+        return predicted_labels
+
+    @overload
+    def to(  # noqa: E704
+        self,
+        device: Optional[DeviceLikeType] = ...,
+        dtype: Optional[torch.dtype] = ...,
+        non_blocking: bool = ...,
+    ) -> Self: ...
+
+    @overload
+    def to(self, dtype: torch.dtype, non_blocking: bool = ...) -> Self: ...  # noqa: E704
+
+    @overload
+    def to(self, tensor: torch.Tensor, non_blocking: bool = ...) -> Self: ...  # noqa: E704
+
+    def to(self, *args, **kwargs):  # type: ignore
+        r"""Move and/or cast the parameters and buffers.
+
+        This has been taken from torch.nn.Module:
+        https://github.com/pytorch/pytorch/blob/d38164a545b4a4e4e0cf73ce67173f70574890b6/torch/nn/modules/module.py#L1244
+
+        This has been adapted so that the `label_definition_embeddings`
+        are also moved to the correct device if `inference_ready` is `True`.
+
+        This can be called as
+
+        .. function:: to(device=None, dtype=None, non_blocking=False)
+           :noindex:
+
+        .. function:: to(dtype, non_blocking=False)
+           :noindex:
+
+        .. function:: to(tensor, non_blocking=False)
+           :noindex:
+
+        .. function:: to(memory_format=torch.channels_last)
+           :noindex:
+
+        Its signature is similar to :meth:`torch.Tensor.to`, but only accepts
+        floating point or complex :attr:`dtype`\ s. In addition, this method will
+        only cast the floating point or complex parameters and buffers to :attr:`dtype`
+        (if given). The integral parameters and buffers will be moved
+        :attr:`device`, if that is given, but with dtypes unchanged. When
+        :attr:`non_blocking` is set, it tries to convert/move asynchronously
+        with respect to the host if possible, e.g., moving CPU Tensors with
+        pinned memory to CUDA devices.
+
+        See below for examples.
+
+        .. note::
+            This method modifies the module in-place.
+
+        Args:
+            device (:class:`torch.device`): the desired device of the parameters
+                and buffers in this module
+            dtype (:class:`torch.dtype`): the desired floating point or complex dtype of
+                the parameters and buffers in this module
+            tensor (torch.Tensor): Tensor whose dtype and device are the desired
+                dtype and device for all parameters and buffers in this module
+            memory_format (:class:`torch.memory_format`): the desired memory
+                format for 4D parameters and buffers in this module (keyword
+                only argument)
+
+        Returns:
+            Module: self
+
+        Examples::
+
+            >>> # xdoctest: +IGNORE_WANT("non-deterministic")
+            >>> linear = nn.Linear(2, 2)
+            >>> linear.weight
+            Parameter containing:
+            tensor([[ 0.1913, -0.3420],
+                    [-0.5113, -0.2325]])
+            >>> linear.to(torch.double)
+            Linear(in_features=2, out_features=2, bias=True)
+            >>> linear.weight
+            Parameter containing:
+            tensor([[ 0.1913, -0.3420],
+                    [-0.5113, -0.2325]], dtype=torch.float64)
+            >>> # xdoctest: +REQUIRES(env:TORCH_DOCTEST_CUDA1)
+            >>> gpu1 = torch.device("cuda:1")
+            >>> linear.to(gpu1, dtype=torch.half, non_blocking=True)
+            Linear(in_features=2, out_features=2, bias=True)
+            >>> linear.weight
+            Parameter containing:
+            tensor([[ 0.1914, -0.3420],
+                    [-0.5112, -0.2324]], dtype=torch.float16, device='cuda:1')
+            >>> cpu = torch.device("cpu")
+            >>> linear.to(cpu)
+            Linear(in_features=2, out_features=2, bias=True)
+            >>> linear.weight
+            Parameter containing:
+            tensor([[ 0.1914, -0.3420],
+                    [-0.5112, -0.2324]], dtype=torch.float16)
+
+            >>> linear = nn.Linear(2, 2, bias=None).to(torch.cdouble)
+            >>> linear.weight
+            Parameter containing:
+            tensor([[ 0.3741+0.j,  0.2382+0.j],
+                    [ 0.5593+0.j, -0.4443+0.j]], dtype=torch.complex128)
+            >>> linear(torch.ones(3, 2, dtype=torch.cdouble))
+            tensor([[0.6122+0.j, 0.1150+0.j],
+                    [0.6122+0.j, 0.1150+0.j],
+                    [0.6122+0.j, 0.1150+0.j]], dtype=torch.complex128)
+
+        """
+        device, dtype, non_blocking, convert_to_format = torch._C._nn._parse_to(
+            *args, **kwargs
+        )
+
+        if dtype is not None:
+            if not (dtype.is_floating_point or dtype.is_complex):
+                raise TypeError(
+                    "nn.Module.to only accepts floating point or complex "
+                    f"dtypes, but got desired dtype={dtype}"
+                )
+            if dtype.is_complex:
+                warnings.warn(
+                    "Complex modules are a new feature under active development whose design may change, "
+                    "and some modules might not work as expected when using complex tensors as parameters or buffers. "
+                    "Please file an issue at https://github.com/pytorch/pytorch/issues/new?template=bug-report.yml "
+                    "if a complex module does not work as expected."
+                )
+
+        def convert(t: torch.Tensor) -> torch.Tensor:
+            try:
+                if convert_to_format is not None and t.dim() in (4, 5):
+                    return t.to(
+                        device,
+                        dtype if t.is_floating_point() or t.is_complex() else None,
+                        non_blocking,
+                        memory_format=convert_to_format,
+                    )
+                return t.to(
+                    device,
+                    dtype if t.is_floating_point() or t.is_complex() else None,
+                    non_blocking,
+                )
+            except NotImplementedError as e:
+                if str(e) == "Cannot copy out of meta tensor; no data!":
+                    raise NotImplementedError(
+                        f"{e} Please use torch.nn.Module.to_empty() instead of torch.nn.Module.to() "
+                        f"when moving module from meta to a different device."
+                    ) from None
+                else:
+                    raise
+
+        if self.inference_ready:
+            self.label_definition_embeddings = convert(self.label_definition_embeddings)
+        return self._apply(convert)

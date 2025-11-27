@@ -1,5 +1,126 @@
 # WSD Torch Models
 
+This repository contains the code for the Word Sense Disambiguation (WSD) PyTorch models that have been trained and developed by the [UCREL NLP Group](https://ucrel.lancs.ac.uk/) at Lancaster University, UK.
+
+## Installation
+
+Requires Python `3.10` or greater, it is best that you install the version of PyTorch you would like to use, e.g. CPU/GPU version etc before installing this package else you will get the default version of PyTorch for your operating system/setup, but we do require `torch>=2.2,<3.0`.
+
+``` bash
+pip install wsd-torch-models
+```
+
+## Models with examples
+
+Here we list the various WSD models we have implemented and how to use them.
+
+### Bi-Encoder Model (BEM)
+
+An inference only implementation of the Bi-Encoder Model (BEM) for Word Sense Disambiguation from the paper [Moving Down the Long Tail of Word Sense Disambiguation with Gloss Informed Bi-encoders](https://aclanthology.org/2020.acl-main.95.pdf). This is a bi-encoder model whereby it encodes the word(s) to disambiguate using the word(s) text context, e.g. whole sentence or document and it will encode every sense definition given and return the most similar sense definition for the given word(s). Unlike the original BEM model we use the same model to encode both the text to disambiguate and the label definitions.
+
+These models were trained using the code from the following GitHub repository [https://github.com/UCREL/experimental-wsd](https://github.com/UCREL/experimental-wsd) and ported over to this library for inference only use with easy saving and loading from the HuggingFace hub.
+
+We currently have 4 pre-trained BEM models that predict sense labels from the [USAS](https://ucrel.lancs.ac.uk/usas/usas_guide.pdf) sense inventory which contains 232 sense categories, which in comparison to WordNet is very coarse (WordNet has approximately 117,000 senses):
+*
+*
+*
+*
+
+Of which an example of how to run them can be found below, this particular example uses the Small English model:
+
+``` python
+from transformers import AutoTokenizer
+import torch
+
+from wsd_torch_models.bem import BEM
+
+
+if __name__ == "__main__": 
+    wsd_model = BEM.from_pretrained("ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM")
+    tokenizer = AutoTokenizer.from_pretrained("ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM")
+
+    wsd_model.eval()
+    # Change this to the device you would like to use, e.g. cpu
+    model_device = "cpu"
+    wsd_model.to(device=model_device)
+    
+    sentence = "The river bank was full of fish"
+    sentence_tokens = sentence.split()
+    
+    with torch.inference_mode(mode=True):
+        # sub_word_tokenizer can be None when None it will download the appropriate tokenizer
+        # but generally it is better to give it the tokenizer as it saves the operation
+        # of checking if the tokenizer is already downloaded.
+        predictions = wsd_model.predict(sentence_tokens, sub_word_tokenizer=tokenizer, top_n=5)
+        
+        for sentence_token, semantic_tags in zip(sentence_tokens, predictions):
+            print(f"Token: {sentence_token}")
+            print("Most likely tags: ")
+            for tag in semantic_tags:
+                tag_definition = wsd_model.label_to_definition[tag]
+                print(f"\t{tag}: {tag_definition}")
+            print()
+```
+
+Output from running the code above:
+``` bash
+Token: The
+Most likely tags: 
+        Z5: title: Grammatical bin description: Prepositions/adverbs/conjunctions, etc
+        Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
+        A7: title: Definite (+ modals) description: Abstract terms of modality (possibility, necessity, certainty, etc.)
+
+Token: river
+Most likely tags: 
+        M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
+        W3: title: Geographical terms description: Geographical terms
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        L2: title: Living creatures generally description: Terms relating to living creatures (e.g. non-human)
+        Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
+
+Token: bank
+Most likely tags: 
+        M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
+        I1: title: Money generally description: Terms relating to money generally
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
+        W3: title: Geographical terms description: Geographical terms
+
+Token: was
+Most likely tags: 
+        M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
+        W3: title: Geographical terms description: Geographical terms
+        M3: title: Means of transport (Land) description: Terms depicting means of transport/ways of transporting and/or travelling (on land)
+        K6: title: Children’s games and toys description: Terms relating to children’s games and toys
+        H1: title: Architecture & kinds of houses & buildings description: Terms relating to buildings/habitats of various kinds, and their construction
+
+Token: full
+Most likely tags: 
+        M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        W3: title: Geographical terms description: Geographical terms
+        L3: title: Plants description: Terms relating to plants and plant-life
+        Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
+
+Token: of
+Most likely tags: 
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
+        Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
+        O1.1: title: Substances and materials generally: Solid description: Terms depicting solid substances/materials
+        L3: title: Plants description: Terms relating to plants and plant-life
+
+Token: fish
+Most likely tags: 
+        L2: title: Living creatures generally description: Terms relating to living creatures (e.g. non-human)
+        O1.1: title: Substances and materials generally: Solid description: Terms depicting solid substances/materials
+        Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+        O2: title: Objects generally description: Terms relating to objects generally
+        Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
+```
+
 ## Development
 
 ### Setup
@@ -60,3 +181,19 @@ The default or recommended Python version is shown in [.python-version](./.pytho
 uv python pin
 # uv python pin 3.13
 ```
+
+### Converting PyTorch Lightning Model to PyTorch HuggingFace Model
+
+Some of the WSD models were originally trained using [PyTorch Lightning](https://lightning.ai/docs/pytorch/stable/), this section details how we convert these models to PyTorch models with a [HuggingFace Pytorch Model Hub Mixin](https://huggingface.co/docs/huggingface_hub/en/package_reference/mixins#huggingface_hub.PyTorchModelHubMixin), the mixin allows the model to easily be loaded and saved from and to the HuggingFace hub.
+
+#### PyMUSAS BEM models
+
+``` bash
+uv run scripts/load_model.py ./model_readmes/pymusas_bem.md
+```
+
+
+### Python packages that can be removed and replaced
+
+As of Python version `3.11`:
+* `from typing_extensions import Self` - the `typing_extensions` package can be removed and this can be replaced with `from typing import Self`

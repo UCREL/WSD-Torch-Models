@@ -1,15 +1,18 @@
 import math
+from pathlib import Path
 
 import pytest
 import torch
-from transformers import PreTrainedModel
+from transformers import AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
 
 from wsd_torch_models.bem import BEM
+from wsd_torch_models.data_utils import load_usas_mapper
 
 
 class TestBEM:
 
     BASE_MODEL_NAME = "jhu-clsp/ettin-encoder-17m"
+    BASE_MODEL_DIM = 256
 
     @pytest.fixture
     def bem_model(self) -> BEM:
@@ -134,7 +137,8 @@ class TestBEM:
     @pytest.mark.parametrize("text_token_masking", [True, False])
     @pytest.mark.parametrize("text_word_ids_masking", [True, False])
     @pytest.mark.parametrize("label_definitions_attention_masking", [True, False])
-    def test_forward_with_no_masking(self, bem_model: BEM,
+    def test_forward_with_no_masking(self,
+                                     bem_model: BEM,
                                      text_token_masking: bool,
                                      text_word_ids_masking: bool,
                                      label_definitions_attention_masking: bool) -> None:
@@ -187,3 +191,124 @@ class TestBEM:
             torch.testing.assert_close(result[0], result[2])
         with pytest.raises(AssertionError):
             torch.testing.assert_close(result[0], result[1])
+
+    @torch.inference_mode(mode=True)
+    @pytest.mark.parametrize("inference_ready", [True, False])
+    def test_model_saving_and_loading(self, tmp_path: Path, bem_model: BEM, inference_ready: bool) -> None:
+        # B = 3 S = 4
+        # B x S
+        text_input_ids = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8], [1, 2, 3, 4]])
+        
+        text_attention_mask = torch.tensor([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
+        # B x S x D
+        text_encoding = bem_model.text_encoding(text_input_ids, text_attention_mask)
+        assert (3, 4, self.BASE_MODEL_DIM) == text_encoding.shape
+
+        assert not bem_model.inference_ready
+        label_definitions: dict[str, str] | None = None
+        label_definition_embeddings: torch.Tensor | None = None
+        if inference_ready:
+            all_label_definitions = load_usas_mapper(None)
+            label_definitions = {"Z1": all_label_definitions['Z1'],
+                                 "Z2": all_label_definitions['Z2']}
+            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+            assert isinstance(tokenizer, PreTrainedTokenizerBase)
+            bem_model.embed_and_set_label_definitions(label_definitions,
+                                                      tokenizer)
+            label_definition_embeddings = bem_model.label_definition_embeddings
+
+        temp_model_dir = tmp_path / "model"
+        bem_model.save_pretrained(temp_model_dir)
+        loaded_bem_model = BEM.from_pretrained(temp_model_dir)
+        loaded_text_encoding = loaded_bem_model.text_encoding(text_input_ids, text_attention_mask)
+        assert (3, 4, self.BASE_MODEL_DIM) == loaded_text_encoding.shape
+        torch.testing.assert_close(text_encoding, loaded_text_encoding)
+
+        if inference_ready:
+            assert loaded_bem_model.inference_ready
+            assert isinstance(label_definitions, dict)
+            assert label_definitions == loaded_bem_model.label_to_definition
+            
+            assert isinstance(loaded_bem_model.label_definition_embeddings, torch.Tensor)
+            assert (1, len(label_definitions), self.BASE_MODEL_DIM) == \
+                loaded_bem_model.label_definition_embeddings.shape
+            assert isinstance(label_definition_embeddings, torch.Tensor)
+            torch.testing.assert_close(label_definition_embeddings,
+                                       loaded_bem_model.label_definition_embeddings)
+
+            assert isinstance(loaded_bem_model.embedding_index_to_label, dict)
+            valid_embedding_indexes = set(list(range(len(label_definitions))))
+            for embedding_index, label_value in loaded_bem_model.embedding_index_to_label.items():
+                assert isinstance(embedding_index, int)
+                assert embedding_index in valid_embedding_indexes
+                assert label_value in label_definitions
+        else:
+            assert not loaded_bem_model.inference_ready
+            assert label_definitions is None
+            assert label_definitions == loaded_bem_model.label_to_definition
+            assert loaded_bem_model.label_definition_embeddings is None
+            assert loaded_bem_model.embedding_index_to_label is None
+
+    @torch.inference_mode(mode=True)
+    @pytest.mark.parametrize("device", ["cpu", "meta"])
+    def test_to_device(self, bem_model: BEM, device: str) -> None:
+        all_label_definitions = load_usas_mapper(None)
+        label_definitions = {"Z1": all_label_definitions['Z1'],
+                             "Z2": all_label_definitions['Z2']}
+        tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+        assert isinstance(tokenizer, PreTrainedTokenizerBase)
+        bem_model.embed_and_set_label_definitions(label_definitions,
+                                                  tokenizer)
+        bem_model.to(device)
+        for parameter in bem_model.parameters():
+            assert device == parameter.device.type
+        assert isinstance(bem_model.label_definition_embeddings, torch.Tensor)
+        assert device == bem_model.label_definition_embeddings.device.type
+
+    @torch.inference_mode(mode=True)
+    @pytest.mark.parametrize("with_tokenizer", [True, False])
+    def test_predict(self, bem_model: BEM, with_tokenizer: bool) -> None:
+        tokenizer = None
+        if with_tokenizer:
+            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+            assert isinstance(tokenizer, PreTrainedTokenizerBase)
+        test_tokens = [""]
+        # Raise as inference_ready is False
+        with pytest.raises(ValueError):
+            bem_model.predict(test_tokens, tokenizer)
+        
+        all_label_definitions = load_usas_mapper(None)
+        label_definitions = {"Z1": all_label_definitions['Z1'],
+                             "Z2": all_label_definitions['Z2']}
+        label_tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+        assert isinstance(label_tokenizer, PreTrainedTokenizerBase)
+        bem_model.embed_and_set_label_definitions(label_definitions,
+                                                  label_tokenizer)
+        
+        acceptable_label_values = set(label_definitions.keys())
+        predictions = bem_model.predict(test_tokens, tokenizer)
+        assert len(predictions) == 1
+        assert len(predictions[0]) == len(acceptable_label_values)
+        assert set(predictions[0]) == acceptable_label_values
+
+        # Raise as top_n cannot be 0
+        with pytest.raises(ValueError):
+            bem_model.predict(test_tokens, tokenizer, top_n=0)
+        # Raise as top_n cannot be less than -1
+        with pytest.raises(ValueError):
+            bem_model.predict(test_tokens, tokenizer, top_n=-2)
+
+        test_tokens = ["Hello", "today."]
+        
+        contain_2_prediction_labels = set([-1, 2, 4])
+        for top_n in [-1, 1, 2, 4]:
+            predictions = bem_model.predict(test_tokens, tokenizer, top_n=top_n)
+            assert len(predictions) == 2
+            if top_n in contain_2_prediction_labels:
+                for prediction in predictions:
+                    assert set(prediction) == acceptable_label_values
+            else:
+                for prediction in predictions:
+                    assert len(prediction) == 1
+                    assert prediction[0] in acceptable_label_values
+        
