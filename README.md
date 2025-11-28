@@ -61,8 +61,9 @@ if __name__ == "__main__":
                 print(f"\t{tag}: {tag_definition}")
             print()
 ```
+<details>
+<summary>Output from running the code above:</summary>
 
-Output from running the code above:
 ``` bash
 Token: The
 Most likely tags: 
@@ -120,6 +121,8 @@ Most likely tags:
         O2: title: Objects generally description: Terms relating to objects generally
         Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
 ```
+
+</details>
 
 ## Development
 
