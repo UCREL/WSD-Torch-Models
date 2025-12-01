@@ -154,11 +154,23 @@ if __name__ == "__main__":
         hyper_parameter_key: torch_lightning_checkpoint["hyper_parameters"][hyper_parameter_key]
         for hyper_parameter_key in hyper_parameters_keys
     }
+
+    tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"])
+    assert isinstance(tokenizer, PreTrainedTokenizerBase)
+
+    if update_model:
+        logger.info("Updating model and uploading to the HuggingFace Hub")
+        wsd_model = BEM(**hyper_parameters_dict)
+        wsd_model.load_state_dict(torch_lightning_checkpoint["state_dict"])
+        
+        label_definitions = load_usas_mapper(tags_to_filter_out=usas_tags_to_filter_out)
+        wsd_model.embed_and_set_label_definitions(label_definitions, tokenizer)
+        
+        
+        wsd_model.push_to_hub(hf_repository_id, branch=hf_branch)
     
     if update_tokenizer:
         logger.info("Updating tokenizer and uploading to the HuggingFace Hub")
-        tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"])
-        assert isinstance(tokenizer, PreTrainedTokenizerBase)
         tokenizer.push_to_hub(hf_repository_id, revision=hf_branch)
 
     if update_readme:
@@ -203,16 +215,5 @@ if __name__ == "__main__":
                                       )
         card = ModelCard(content)
         card.push_to_hub(hf_repository_id, repo_type=repository_type, revision=hf_branch)
-
-    if update_model:
-        logger.info("Updating model and uploading to the HuggingFace Hub")
-        wsd_model = BEM(**hyper_parameters_dict)
-        wsd_model.load_state_dict(torch_lightning_checkpoint["state_dict"])
-        
-        label_definitions = load_usas_mapper(tags_to_filter_out=usas_tags_to_filter_out)
-        wsd_model.embed_and_set_label_definitions(label_definitions, tokenizer)
-        
-        
-        wsd_model.push_to_hub(hf_repository_id, branch=hf_branch)
 
     logger.info("Done")
