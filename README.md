@@ -22,10 +22,10 @@ These models were trained using the code from the following GitHub repository [h
 
 We currently have 4 pre-trained BEM models that predict sense labels from the [USAS](https://ucrel.lancs.ac.uk/usas/usas_guide.pdf) sense inventory which contains 232 sense categories, which in comparison to WordNet is very coarse (WordNet has approximately 117,000 senses), more details about these models and how they were trained can be found in our forthcoming paper:
 
-* [ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM]() - 17 million parameter English only model.
-* [ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM]() - 68 million parameter English only model.
-* [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM]() - 140 million parameter Multilingual model.
-* [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM]() - 307 million parameter Multilingual model.
+* [ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM) - 17 million parameter English only model.
+* [ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM) - 68 million parameter English only model.
+* [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM) - 140 million parameter Multilingual model.
+* [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM) - 307 million parameter Multilingual model.
 
 Of which an example of how to run them can be found below, this particular example uses the Small English model:
 
@@ -141,7 +141,7 @@ All of these models have been trained on a portion of the [ucrelnlp/English-USAS
 | Intermediate Size | 384 | 768 | 1152 | 1152 |
 | Attention Heads | 4 | 8 | 6 | 12 |
 | Total Parameters | 17M | 68M | 140M | 307M |
-| Non-embedding Parameters | 42M | 110M |
+| Non-embedding Parameters | 3.9M | 42.4M | 42M | 110M |
 | Max Sequence Length | 8,000 | 8,000 | 8,192 | 8,192 |
 | Vocabulary Size | 50,368 | 50,368 | 256,000 | 256,000 |
 | Tokenizer | ModernBERT | ModernBERT | Gemma 2 | Gemma 2 |
@@ -275,8 +275,6 @@ To upload only an updated/new README:
 ``` bash
 uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM main checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -r
 ```
-
-
 
 ### Python packages that can be removed and replaced
 
