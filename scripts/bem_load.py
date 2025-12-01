@@ -5,8 +5,9 @@ from wsd_torch_models.bem import BEM
 
 
 if __name__ == "__main__": 
-    wsd_model = BEM.from_pretrained("ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM")
-    tokenizer = AutoTokenizer.from_pretrained("ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM")
+    wsd_model_name = "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM"
+    wsd_model = BEM.from_pretrained(wsd_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name)
 
     wsd_model.eval()
     # Change this to the device you would like to use, e.g. cpu
