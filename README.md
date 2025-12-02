@@ -223,7 +223,7 @@ make tests
 
 ### Setting a different default python version
 
-The default or recommended Python version is shown in [.python-version](./.python-version, currently `3.10`, this can be changed using the [uv command](https://docs.astral.sh/uv/reference/cli/#uv-python-pin):
+The default or recommended Python version is shown in [.python-version](./.python-version, currently `3.13`, this can be changed using the [uv command](https://docs.astral.sh/uv/reference/cli/#uv-python-pin):
 
 ``` bash
 uv python pin

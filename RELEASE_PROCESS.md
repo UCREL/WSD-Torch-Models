@@ -28,31 +28,25 @@ to `git@github.com:UCREL/WSD-Torch-Models.git` (or the `HTTPS` equivalent). To c
 3. Update the `CHANGELOG.md` so that everything under the "Unreleased" section is now under a section corresponding to this release, e.g. `v0.3.1`.
 
 
-4. Publish with [uv](https://docs.astral.sh/uv/guides/package/#publishing-your-package):
-
-    ``` bash
-    uv publish
-    ```
-
-6. Add these changes using Git manually (`git add`), then commit and push these changes with:
+4. Add these changes using Git manually (`git add`), then commit and push these changes with:
 
     ```
     git commit -m "Prepare for release $TAG" && git push origin main
     ```
     
-7. Then add the tag in git to mark the release (When prompted for a tag message use "Release v{VERSION}"):
+5. Then add the tag in git to mark the release (When prompted for a tag message use "Release v{VERSION}"):
 
     ```
     git tag -s $TAG && git push origin main --tags
     ```
 
-8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
+6. Find the tag you just pushed [on GitHub](https://github.com/UCREL/WSD-Torch-Models/tree/main), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
 
     ``` bash
     make release-notes
     ```
 
-9. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
+7. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
 
 
 ## Fixing a failed release
