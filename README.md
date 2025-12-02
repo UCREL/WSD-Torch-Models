@@ -260,7 +260,7 @@ options:
 To upload the model, tokenizer and README for all 4 models to the main branch:
 
 ``` bash
-uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Small-BEM main checkpoints/bem_english_small/checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -rmt
+uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Small-BEM main checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -rmt
 
 uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Base-BEM main checkpoints/bem_english_base/model-step=532637-validation_accuracy=0.99669.ckpt model_readmes/pymusas_bem.md -rmt
 
