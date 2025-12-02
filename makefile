@@ -1,3 +1,5 @@
+VERSION_CMD = "uv run scripts/get_version.py ./pyproject.toml"
+
 .PHONY: lint
 lint:
 	@echo "ISort:"
@@ -12,3 +14,15 @@ lint:
 tests:
 	@uv run coverage run
 	@uv run coverage report
+
+.PHONY: build-python-package
+build-python-package:
+	@uv lock --check
+	@rm -rf ./dist
+	@uv build
+
+.PHONY: release-notes
+release-notes:
+	@uv run --no-project --script \
+	--with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
+	./scripts/release_notes.py
