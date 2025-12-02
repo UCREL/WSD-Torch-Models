@@ -37,7 +37,7 @@ def generate_bem_readme(readme_template_path: Path,
         base_model_language (str): The language of the base model, e.g.
             English or Multilingual
         model_id (str): The model id, e.g.
-            ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM
+            ucrelnlp/PyMUSAS-Neural-English-Small-BEM
 
     Returns:
         str: The formatted readme
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     hf_repository_id_help = (
         "The repository ID to upload the model too on the HuggingFace Hub, e.g. "
-        "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM"
+        "ucrelnlp/PyMUSAS-Neural-English-Small-BEM"
     )
     hf_branch_help = (
         "The branch to upload the model too on the HuggingFace Hub, e.g. main, "
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     supported_model_repositories = set([
-        "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM",
-        "ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM",
+        "ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
+        "ucrelnlp/PyMUSAS-Neural-English-Base-BEM",
         "ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM",
         "ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM",
     ])
@@ -184,11 +184,11 @@ if __name__ == "__main__":
         model_size: str | None = None
         base_model_language: str | None = None
 
-        if hf_repository_id == "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM":
+        if hf_repository_id == "ucrelnlp/PyMUSAS-Neural-English-Small-BEM":
             model_title = "PyMUSAS Neural English Small BEM"
             model_size = "17 Million (17M)"
             base_model_language = "English"
-        elif hf_repository_id == "ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM":
+        elif hf_repository_id == "ucrelnlp/PyMUSAS-Neural-English-Base-BEM":
             model_title = "PyMUSAS Neural English Base BEM"
             model_size = "68 Million (68M)"
             base_model_language = "English"

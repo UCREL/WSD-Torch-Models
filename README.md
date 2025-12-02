@@ -22,8 +22,8 @@ These models were trained using the code from the following GitHub repository [h
 
 We currently have 4 pre-trained BEM models that predict sense labels from the [USAS](https://ucrel.lancs.ac.uk/usas/usas_guide.pdf) sense inventory which contains 232 sense categories, which in comparison to WordNet is very coarse (WordNet has approximately 117,000 senses), more details about these models and how they were trained can be found in our forthcoming paper:
 
-* [ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM) - 17 million parameter English only model.
-* [ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM) - 68 million parameter English only model.
+* [ucrelnlp/PyMUSAS-Neural-English-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Small-BEM) - 17 million parameter English only model.
+* [ucrelnlp/PyMUSAS-Neural-English-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Base-BEM) - 68 million parameter English only model.
 * [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM) - 140 million parameter Multilingual model.
 * [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM) - 307 million parameter Multilingual model.
 
@@ -37,7 +37,7 @@ from wsd_torch_models.bem import BEM
 
 
 if __name__ == "__main__": 
-    wsd_model_name = "ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM"
+    wsd_model_name = "ucrelnlp/PyMUSAS-Neural-English-Small-BEM"
     wsd_model = BEM.from_pretrained(wsd_model_name)
     tokenizer = AutoTokenizer.from_pretrained(wsd_model_name)
 
@@ -245,7 +245,7 @@ usage: convert_and_upload_bem_model.py [-h] [-r] [-t] [-m] hf_repository_id hf_b
 Converts a PyTorch Lightning model to a PyTorch HuggingFace model and uploads it to the HuggingFace Hub. The script allows you to just update the model README, model tokenizer, the model itself, or any combinationof these options.
 
 positional arguments:
-  hf_repository_id      The repository ID to upload the model too on the HuggingFace Hub, e.g. ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM
+  hf_repository_id      The repository ID to upload the model too on the HuggingFace Hub, e.g. ucrelnlp/PyMUSAS-Neural-English-Small-BEM
   hf_branch             The branch to upload the model too on the HuggingFace Hub, e.g. main, a branch named after the step the model was trained on.
   model_checkpoint      Path to the model checkpoint that you would like to upload
   readme_template_path  File path to the models README template
@@ -261,9 +261,9 @@ options:
 To upload the model, tokenizer and README for all 4 models to the main branch:
 
 ``` bash
-uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM main checkpoints/bem_english_small/checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -rmt
+uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Small-BEM main checkpoints/bem_english_small/checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -rmt
 
-uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Engish-Base-BEM main checkpoints/bem_english_base/model-step=532637-validation_accuracy=0.99669.ckpt model_readmes/pymusas_bem.md -rmt
+uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Base-BEM main checkpoints/bem_english_base/model-step=532637-validation_accuracy=0.99669.ckpt model_readmes/pymusas_bem.md -rmt
 
 uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM main checkpoints/bem_multilingual_small/model-step=392261-validation_accuracy=0.99615.ckpt model_readmes/pymusas_bem.md -rmt
 
@@ -273,7 +273,7 @@ uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Multiling
 To upload only an updated/new README:
 
 ``` bash
-uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-Engish-Small-BEM main checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -r
+uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Small-BEM main checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -r
 ```
 
 ### Python packages that can be removed and replaced
