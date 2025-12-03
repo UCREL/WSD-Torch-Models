@@ -155,7 +155,8 @@ if __name__ == "__main__":
         for hyper_parameter_key in hyper_parameters_keys
     }
 
-    tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"])
+    tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"],
+                                              add_prefix_space=True)
     assert isinstance(tokenizer, PreTrainedTokenizerBase)
 
     if update_model:

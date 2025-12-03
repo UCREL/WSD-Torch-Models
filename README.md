@@ -39,7 +39,7 @@ from wsd_torch_models.bem import BEM
 if __name__ == "__main__": 
     wsd_model_name = "ucrelnlp/PyMUSAS-Neural-English-Base-BEM"
     wsd_model = BEM.from_pretrained(wsd_model_name)
-    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)
 
     wsd_model.eval()
     # Change this to the device you would like to use, e.g. cpu
@@ -70,56 +70,57 @@ if __name__ == "__main__":
 Token: The
 Most likely tags: 
 	Z5: title: Grammatical bin description: Prepositions/adverbs/conjunctions, etc
-	N3.7: title: Measurement: Length & height description: Terms of measurement relating to length and height
-	Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
-	M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
-	Z8: title: Pronouns etc. description: Pronouns (standard and colloquial)
+	I1.1: title: Money: Affluence description: Terms relating to (level of) wealth/prosperity
+	Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
+	M6: title: Location and direction description: Terms depicting position of/point of reference for X
+	I1: title: Money generally description: Terms relating to money generally
 
 Token: river
 Most likely tags: 
+	W3: title: Geographical terms description: Geographical terms
 	M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
 	Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
-	W3: title: Geographical terms description: Geographical terms
-	Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
-	Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
+	O2: title: Objects generally description: Terms relating to objects generally
+	N5: title: Quantities description: Terms depicting quantities
 
 Token: bank
 Most likely tags: 
+	W3: title: Geographical terms description: Geographical terms
 	M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
-	Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
-	Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
-	Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
 	M6: title: Location and direction description: Terms depicting position of/point of reference for X
+	O2: title: Objects generally description: Terms relating to objects generally
+	I1: title: Money generally description: Terms relating to money generally
 
 Token: was
 Most likely tags: 
 	Z5: title: Grammatical bin description: Prepositions/adverbs/conjunctions, etc
-	Z8: title: Pronouns etc. description: Pronouns (standard and colloquial)
-	Z4: title: Discourse Bin description: Discourse markers, emphatic communication terms
-	A4.1: title: Generally kinds, groups, examples description: General/abstract terms denoting types, groups, examples
-	Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
+	A3: title: Being description: General/abstract terms relating to being/existing
+	A5.4: title: Evaluation: Authenticity description: Evaluative terms depicting authenticity
+	O4.2: title: Judgement of appearance (pretty etc.) description: Descriptive terms relating to the appearance/look of X
+	A5.1: title: Evaluation: Good/bad description: Evaluative terms depicting quality
 
 Token: full
 Most likely tags: 
-	Z4: title: Discourse Bin description: Discourse markers, emphatic communication terms
-	Z5: title: Grammatical bin description: Prepositions/adverbs/conjunctions, etc
+	N5.1: title: Entirety; maximum description: Terms depicting maximal/maximum quantities
+	N3.2: title: Measurement: Size description: Terms of measurement relating to size
+	I3.2: title: Work and employment: Professionalism description: Terms relating to (level of) professionalism
+	A5.1: title: Evaluation: Good/bad description: Evaluative terms depicting quality
 	M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
-	Z8: title: Pronouns etc. description: Pronouns (standard and colloquial)
-	N3.7: title: Measurement: Length & height description: Terms of measurement relating to length and height
 
 Token: of
 Most likely tags: 
 	Z5: title: Grammatical bin description: Prepositions/adverbs/conjunctions, etc
-	Z3: title: Other proper names description: Nouns that distinguish/identify a product, company, etc. (note – also includes acronyms)
-	Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
-	Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
-	Z8: title: Pronouns etc. description: Pronouns (standard and colloquial)
+	N5.1: title: Entirety; maximum description: Terms depicting maximal/maximum quantities
+	N3.2: title: Measurement: Size description: Terms of measurement relating to size
+	N5: title: Quantities description: Terms depicting quantities
+	X9.1: title: Ability: Ability, intelligence description: Terms depicting (level of) ability/intelligence
 
 Token: fish
 Most likely tags: 
 	L2: title: Living creatures generally description: Terms relating to living creatures (e.g. non-human)
+	F1: title: Food description: Terms relating to food and food preparation
+	S2.1: title: People: Female description: Terms relating to females
 	M4: title: Means of transport (Water) description: Terms depicting means of transport/ways of transporting and/or travelling (by water)
-	Z1: title: Personal names description: Nouns that distinguish/identify an individual (e.g. a first name and/or surname, a title of address)
 	Z2: title: Geographical names description: Nouns that distinguish/identify a specific place (e.g. the name of a road, a city, a country, a continent, etc.)
 ```
 

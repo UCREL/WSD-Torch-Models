@@ -1,6 +1,6 @@
 [project]
 name = "wsd-torch-models"
-version = "0.1.0"
+version = "0.1.1"
 description = "Word Sense Disambiguation models that have been converted from PyTorch Lightning to PyTorch with HuggingFace Hub Mixin"
 readme = "README.md"
 authors = [

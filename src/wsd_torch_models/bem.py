@@ -847,7 +847,8 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
     def predict(self,
                 tokens: list[str],
                 sub_word_tokenizer: PreTrainedTokenizerBase | None = None,
-                top_n: int = -1
+                top_n: int = -1,
+                tokenizer_kwargs: dict[str, Any] | None = None
                 ) -> list[list[str]]:
         """
         Predicts the `top_n` sense labels per token whereby those sense labels
@@ -875,12 +876,17 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 is `transformers.AutoTokenizer.from_pretrained(self.base_model_name)`.
             top_n (int): The number of sense labels to predict. Default -1 which
                 predicts all sense labels. If 0 will raise a ValueError.
+            tokenizer_kwargs (dict[str, Any] | None): Keyword arguments to pass
+                to the sub word tokenizer `transformers.AutoTokenizer.from_pretrained` method.
+                Default None.
 
         Returns:
             list[list[str]]: A list of sense labels per token, where the
                 number of sense labels predicted per token is `top_n`.
 
         Raises:
+            ValueError: If the number of tokens given is not the same as the
+                number of sense labels predicted/returned.
             ValueError: If `top_n` is 0 or less than -1.
             ValueError: If the model does not have the `label_definition_embeddings`
                 attribute set using either the method `embed_and_set_label_definitions`,
@@ -900,7 +906,10 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             raise ValueError(f"The top_n argument cannot be {top_n}, has to be either "
                              "-1 or a positive integer > 0.")
         if sub_word_tokenizer is None:
-            sub_word_tokenizer = AutoTokenizer.from_pretrained(self.base_model_name)  # type: ignore
+            if tokenizer_kwargs is None:
+                tokenizer_kwargs = {}
+            sub_word_tokenizer = AutoTokenizer.from_pretrained(self.base_model_name,
+                                                               **tokenizer_kwargs)  # type: ignore
             assert isinstance(sub_word_tokenizer, PreTrainedTokenizerBase)
         model_device = self.base_model.device
         number_tokens = len(tokens)  # This can be seen as the batch size.
@@ -939,6 +948,12 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 [self.embedding_index_to_label[top_n_index]  # type: ignore
                  for top_n_index in top_n_label_similarity_score]
             )
+
+        number_predicted_labels = len(predicted_labels)
+        if number_predicted_labels != number_tokens:
+            raise ValueError(f"The number of tokens: {number_tokens} given is not "
+                             "the same as the number of sense labels "
+                             f"predicted/returned: {number_predicted_labels}")
 
         return predicted_labels
 

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.1]() - 2025-12-03
+
+### Added
+
+- `tokenizer_kwargs` optional argument to the `wsd_torch_models.bem.BEM.predict` method. This allows users to define key word arguments that can be passed to the sub word tokenizer that is downloaded from HuggingFace through ``transformers.AutoTokenizer.from_pretrained`.
+- Added a `ValueError` that is raised within the `wsd_torch_models.bem.BEM.predict` when the number of predicted sense labels does not equal the number of tokens that were given that should have a predicted sense label.
+- Added `add_prefix_space=True` argument to the `AutoTokenizer.from_pretrained` method for all examples in the `README.md`, `scripts/convert_and_upload_bem_model.py`, and `model_readmes/pymusas_bem.md`. This is required as this is what the pre-trained `BEM` models expect.
+- The devcontainers, found in `.devcontainer`, have been improved so that they use the cached uv packages that have been installed at docker build time.
+
 ## [v0.1.0](https://github.com/UCREL/WSD-Torch-Models/releases/tag/v0.1.0) - 2025-12-02
 
 ### Added

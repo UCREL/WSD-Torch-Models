@@ -1,5 +1,6 @@
 import math
 from pathlib import Path
+from typing import Any
 
 import pytest
 import torch
@@ -267,7 +268,8 @@ class TestBEM:
 
     @torch.inference_mode(mode=True)
     @pytest.mark.parametrize("with_tokenizer", [True, False])
-    def test_predict(self, bem_model: BEM, with_tokenizer: bool) -> None:
+    @pytest.mark.parametrize("tokenizer_kwargs", [None, {"add_prefix_space": True}])
+    def test_predict(self, bem_model: BEM, with_tokenizer: bool, tokenizer_kwargs: dict[str, Any] | None) -> None:
         tokenizer = None
         if with_tokenizer:
             tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
@@ -275,7 +277,7 @@ class TestBEM:
         test_tokens = [""]
         # Raise as inference_ready is False
         with pytest.raises(ValueError):
-            bem_model.predict(test_tokens, tokenizer)
+            bem_model.predict(test_tokens, tokenizer, tokenizer_kwargs=tokenizer_kwargs)
         
         all_label_definitions = load_usas_mapper(None)
         label_definitions = {"Z1": all_label_definitions['Z1'],
@@ -286,23 +288,23 @@ class TestBEM:
                                                   label_tokenizer)
         
         acceptable_label_values = set(label_definitions.keys())
-        predictions = bem_model.predict(test_tokens, tokenizer)
+        predictions = bem_model.predict(test_tokens, tokenizer, tokenizer_kwargs=tokenizer_kwargs)
         assert len(predictions) == 1
         assert len(predictions[0]) == len(acceptable_label_values)
         assert set(predictions[0]) == acceptable_label_values
 
         # Raise as top_n cannot be 0
         with pytest.raises(ValueError):
-            bem_model.predict(test_tokens, tokenizer, top_n=0)
+            bem_model.predict(test_tokens, tokenizer, top_n=0, tokenizer_kwargs=tokenizer_kwargs)
         # Raise as top_n cannot be less than -1
         with pytest.raises(ValueError):
-            bem_model.predict(test_tokens, tokenizer, top_n=-2)
+            bem_model.predict(test_tokens, tokenizer, top_n=-2, tokenizer_kwargs=tokenizer_kwargs)
 
         test_tokens = ["Hello", "today."]
         
         contain_2_prediction_labels = set([-1, 2, 4])
         for top_n in [-1, 1, 2, 4]:
-            predictions = bem_model.predict(test_tokens, tokenizer, top_n=top_n)
+            predictions = bem_model.predict(test_tokens, tokenizer, top_n=top_n, tokenizer_kwargs=tokenizer_kwargs)
             assert len(predictions) == 2
             if top_n in contain_2_prediction_labels:
                 for prediction in predictions:

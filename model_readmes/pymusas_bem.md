@@ -43,7 +43,7 @@ from wsd_torch_models.bem import BEM
 if __name__ == "__main__": 
     wsd_model_name = "{model_id}"
     wsd_model = BEM.from_pretrained(wsd_model_name)
-    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)
 
     wsd_model.eval()
     # Change this to the device you would like to use, e.g. cpu
