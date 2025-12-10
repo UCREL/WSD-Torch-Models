@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.2]() - 2025-12-10
+
+### Changed
+
+- The version of `numpy` has been relaxed from `numpy>=2.0.0,<3.0` to `numpy>=1.19.0,<3.0` so that we can use the GPU within a spacy pipeline due to spacy's dependency on [cupy](https://github.com/cupy/cupy) version `cupy-cuda12x>=11.5.0,<13.0.0`.
+
 ## [v0.1.1](https://github.com/UCREL/WSD-Torch-Models/releases/tag/v0.1.1) - 2025-12-03
 
 ### Added

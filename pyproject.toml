@@ -1,6 +1,6 @@
 [project]
 name = "wsd-torch-models"
-version = "0.1.1"
+version = "0.1.2"
 description = "Word Sense Disambiguation models that have been converted from PyTorch Lightning to PyTorch with HuggingFace Hub Mixin"
 readme = "README.md"
 authors = [
@@ -11,7 +11,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10, <3.15"
 dependencies = [
     "huggingface-hub<2.0",
-    "numpy>=2.0,<3.0",
+    "numpy>=1.19.0,<3.0",
     "pyyaml>=6.0,<7.0",
     "safetensors>=0.4.3,<1.0",
     "torch>=2.2,<3.0",
