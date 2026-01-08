@@ -22,10 +22,12 @@ These models were trained using the code from the following GitHub repository [h
 
 We currently have 4 pre-trained BEM models that predict sense labels from the [USAS](https://ucrel.lancs.ac.uk/usas/usas_guide.pdf) sense inventory which contains 232 sense categories, which in comparison to WordNet is very coarse (WordNet has approximately 117,000 senses), more details about these models and how they were trained can be found in our forthcoming paper:
 
-* [ucrelnlp/PyMUSAS-Neural-English-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Small-BEM) - 17 million parameter English only model.
-* [ucrelnlp/PyMUSAS-Neural-English-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Base-BEM) - 68 million parameter English only model.
-* [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM) - 140 million parameter Multilingual model.
-* [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM) - 307 million parameter Multilingual model.
+* [ucrelnlp/PyMUSAS-Neural-English-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Small-BEM) - 17 million parameter English only model. Step number `532637`.
+* [ucrelnlp/PyMUSAS-Neural-English-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Base-BEM) - 68 million parameter English only model. Step number `532637`.
+* [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM) - 140 million parameter Multilingual model. Step number `392261`.
+* [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM) - 307 million parameter Multilingual model. Step number `240947`.
+
+**Note** all of the checkpoint steps for each model are saved as branches, whereby their branch name denotes the step number the model was trained up to, in their respective model repositories on the HuggingFace hub. The `main` branches is the best performing model according to the validation accuracy when training the models, these step numbers for the `main` branch models are stated above for each pre-trained model.
 
 Of which an example of how to run them can be found below, this particular example uses the Small English model:
 
@@ -246,7 +248,7 @@ Converts a PyTorch Lightning model to a PyTorch HuggingFace model and uploads it
 
 positional arguments:
   hf_repository_id      The repository ID to upload the model too on the HuggingFace Hub, e.g. ucrelnlp/PyMUSAS-Neural-English-Small-BEM
-  hf_branch             The branch to upload the model too on the HuggingFace Hub, e.g. main, a branch named after the step the model was trained on.
+  hf_branch             The branch to upload the model too on the HuggingFace Hub, e.g. main, a branch named after the step the model was trained on. If the branch does not exist in the model repository, the branch is created before uploading the model to it.
   model_checkpoint      Path to the model checkpoint that you would like to upload
   readme_template_path  File path to the models README template
 
@@ -275,6 +277,20 @@ To upload only an updated/new README:
 ``` bash
 uv run scripts/convert_and_upload_bem_model.py ucrelnlp/PyMUSAS-Neural-English-Small-BEM main checkpoints/bem_english_small/model-step=532637-validation_accuracy=0.99394.ckpt model_readmes/pymusas_bem.md -r
 ```
+
+To upload a whole directory of checkpoints so that each checkpoint step is a new branch on the HuggingFace model repository use the following bash script;
+
+``` bash
+bash ./scripts/bem_convert_and_upload_checkpoints.sh ./DIRECTORY_TO_CHECKPOINTS HUGGINGFACE_REPOISTORY_ID
+```
+
+An example to upload all of the English small BEM model checkpoints to `ucrelnlp/PyMUSAS-Neural-English-Small-BEM` assuming that these checkpoint files are stored at `./checkpoints/bem_english_small` whereby an example checkpoint file is `model-step=35509-validation_accuracy=0.96956.ckpt` this an example checkpoint file should then be saved to the branch `35509` in the model repository `ucrelnlp/PyMUSAS-Neural-English-Small-BEM`:
+
+``` bash
+bash ./scripts/bem_convert_and_upload_checkpoints.sh ./checkpoints/bem_english_small ucrelnlp/PyMUSAS-Neural-English-Small-BEM
+```
+
+**NOTE** the `./scripts/bem_convert_and_upload_checkpoints.sh` script does have a usage help guide.
 
 ### Python packages that can be removed and replaced
 

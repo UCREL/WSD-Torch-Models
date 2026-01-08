@@ -2,7 +2,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from huggingface_hub import ModelCard, model_info
+from huggingface_hub import ModelCard, model_info, create_branch, list_repo_refs
 import torch
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
@@ -69,7 +69,9 @@ if __name__ == "__main__":
     )
     hf_branch_help = (
         "The branch to upload the model too on the HuggingFace Hub, e.g. main, "
-        "a branch named after the step the model was trained on."
+        "a branch named after the step the model was trained on. If the branch "
+        "does not exist in the model repository, the branch is created before "
+        "uploading the model to it."
     )
     model_checkpoint_help = (
         "Path to the model checkpoint that you would like to upload"
@@ -158,6 +160,15 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(hyper_parameters_dict["base_model_name"],
                                               add_prefix_space=True)
     assert isinstance(tokenizer, PreTrainedTokenizerBase)
+
+    if hf_branch != "main":
+        for branch in list_repo_refs(hf_repository_id).branches:
+            if branch.name == hf_branch:
+                logger.info(f"Branch {hf_branch} already exists")
+                break
+        else:
+            logger.info(f"Creating branch {hf_branch}")
+            create_branch(hf_repository_id, branch=hf_branch, exist_ok=False)
 
     if update_model:
         logger.info("Updating model and uploading to the HuggingFace Hub")
