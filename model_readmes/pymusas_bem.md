@@ -122,7 +122,9 @@ The publicly available datasets can be found on HuggingFace Hub [ucrelnlp/USAS-W
 
 ## Citation
 
-Technical report is forthcoming.
+Paper: [Creating a Hybrid Rule and Neural Network Based Semantic Tagger using Silver Standard Data: the PyMUSAS framework for Multilingual Semantic Annotation](https://arxiv.org/abs/2601.09648)
+
+{bib_citation}
 
 ## Contact Information
 

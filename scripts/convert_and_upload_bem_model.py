@@ -2,7 +2,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from huggingface_hub import ModelCard, model_info, create_branch, list_repo_refs
+from huggingface_hub import ModelCard, create_branch, list_repo_refs, model_info
 import torch
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
@@ -12,6 +12,19 @@ from wsd_torch_models.data_utils import load_usas_mapper
 
 logger = logging.getLogger(__name__)
 
+MODEL_BIB_CITATION = """
+```
+@misc{moore2026creatinghybridruleneural,
+      title={Creating a Hybrid Rule and Neural Network Based Semantic Tagger using Silver Standard Data: the PyMUSAS framework for Multilingual Semantic Annotation}, 
+      author={Andrew Moore and Paul Rayson and Dawn Archer and Tim Czerniak and Dawn Knight and Daisy Lal and Gearóid Ó Donnchadha and Mícheál Ó Meachair and Scott Piao and Elaine Uí Dhonnchadha and Johanna Vuorinen and Yan Yabo and Xiaobin Yang},
+      year={2026},
+      eprint={2601.09648},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2601.09648}, 
+}
+```
+"""
 
 def generate_bem_readme(readme_template_path: Path,
                         base_model_id: str,
@@ -49,7 +62,9 @@ def generate_bem_readme(readme_template_path: Path,
             model_title=model_title,
             model_size=model_size,
             base_model_language=base_model_language,
-            model_id=model_id)
+            model_id=model_id,
+            bib_citation=MODEL_BIB_CITATION,
+        )
         return content
 
 
