@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - Added the arXiv paper to the PyMUSAS BEM model readme, `model_readmes/pymusas_bem.md`, of which this did require the Bib text to be Python string variable in the convert and upload script `scripts/convert_and_upload_bem_model.py`.
+- Changed the [./pyproject.toml](./pyproject.toml) so that local developers can easily install different versions of torch, i.e. cpu or different cuda versions.
+- Updated the [./.github/workflows](./.github/workflows) to use specific GitHub action versions, this should make the workflow more secure. 
+- Updated the [./.devcontainer](./.devcontainer) files so that they use the correct version of torch.
 
 ## [v0.1.2](https://github.com/UCREL/WSD-Torch-Models/releases/tag/v0.1.2) - 2025-12-10
 

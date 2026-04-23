@@ -32,6 +32,49 @@ dev = [
     "pytest>=6.0,!=7.1.0,!=8.1.0",
     "types-pyyaml>=6.0,<7.0",
 ]
+cpu   = ["torch>=2.2,<3.0"]
+cu130 = ["torch>=2.2,<3.0"]
+cu128 = ["torch>=2.2,<3.0"]
+cu126 = ["torch>=2.2,<3.0"]
+
+[tool.uv]
+default-groups = ["dev", "cpu"]
+conflicts = [
+  [
+    { group = "cpu" },
+    { group = "cu130" },
+    { group = "cu128" },
+    { group = "cu126" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu",  group = "cpu"   },
+  { index = "pytorch-cu130", group = "cu130" },
+  { index = "pytorch-cu128", group = "cu128" },
+  { index = "pytorch-cu126", group = "cu126" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url  = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url  = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url  = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url  = "https://download.pytorch.org/whl/cu126"
+explicit = true
 
 [tool.isort]
 known_first_party = "wsd_torch_models"

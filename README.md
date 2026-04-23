@@ -10,6 +10,13 @@ Requires Python `3.10` or greater, it is best that you install the version of Py
 pip install wsd-torch-models
 ```
 
+To install with a different version of `torch`, e.g. `cuda`:
+
+``` bash
+pip install torch --index-url https://download.pytorch.org/whl/cu128
+pip install wsd-torch-models
+```
+
 ## Models with examples
 
 Here we list the various WSD models we have implemented and how to use them.
@@ -207,6 +214,25 @@ When developing on the project you will want to install the Python package local
 
 ```bash
 uv sync
+```
+
+This version of `uv sync` will install the CPU version of `torch` to install a `cuda` version, i.e. `cuda 12.8` run the following:
+
+``` bash
+uv sync --no-group cpu --group cu128
+```
+
+Currently we support `cu126`, `cu128`, and `cu130`, see the [./pyproject.toml](./pyproject.toml) for more information.
+
+
+**NOTE** if using `--no-group cpu --group XXX` then each time you use `uv run` you need to use `uv run --no-group cpu --group XXX`
+
+We have made it slightly simpler with `make` at least for `cu128` (which can be used as template for the other versions) with:
+
+``` bash
+make run-cu128 CMD="python ANY OTHER ARGUMENTS" # Runs Python or any other command that you would after `uv run`
+make tests-cu128 # Runs the tests
+make lint-cu128 # Runs the linting
 ```
 
 ### Running linters and tests

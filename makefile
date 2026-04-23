@@ -26,3 +26,22 @@ release-notes: build-python-package
 	@uv run --no-project --script \
 	--with dist/wsd_torch_models-$$("${VERSION_CMD}")-py3-none-any.whl \
 	./scripts/release_notes.py
+
+.PHONY: run-cu128
+run-cu128:
+	@uv run --no-group cpu --group cu128 $(CMD)
+
+.PHONY: tests-cu128
+tests-cu128:
+	@uv run --no-group cpu --group cu128 coverage run
+	@uv run --no-group cpu --group cu128 coverage report
+
+.PHONY: lint-cu128
+lint-cu128:
+	@echo "ISort:"
+	@uv run --no-group cpu --group cu128 isort src tests scripts
+	@echo "Flake 8:"
+	@uv run --no-group cpu --group cu128 flake8 --config ./.flake8 src tests
+	@echo "MyPy:"
+	@uv run --no-group cpu --group cu128 mypy
+	@echo "Linting finished"

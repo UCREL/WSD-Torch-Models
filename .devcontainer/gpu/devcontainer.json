@@ -15,15 +15,17 @@
 		"vscode": {
 		// Add the IDs of extensions you want installed when the container is created.
 		"extensions": ["streetsidesoftware.code-spell-checker",
-	                   "ms-toolsai.jupyter",
-					   "ms-toolsai.jupyter-renderers",
 					   "ms-python.python",
-					   "ms-python.vscode-pylance",
+					   "astral-sh.ty",
+					   "ms-python.vscode-python-envs",
 					   "ms-vscode.makefile-tools",
 					   "redhat.vscode-yaml",
 					   "tamasfe.even-better-toml",
-					   "github.vscode-github-actions"]
+					   "github.vscode-github-actions",
+					   "mechatroner.rainbow-csv",
+					   "ms-azuretools.vscode-docker",
+                       "ms-azuretools.vscode-containers"]
 		}
   	},
-	"postStartCommand": "uv sync"
+	"postStartCommand": "uv sync --no-group cpu --group cu128"
 }

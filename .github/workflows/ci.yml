@@ -20,25 +20,26 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.02
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2
         id: python-setup
         with:
           python-version: 3.13
       
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         id: setup-uv
         with:
           # Install a specific version of uv.
-          version: "0.9.10"
+          version: "0.11.7"
           enable-cache: true
           restore-cache: true
           save-cache: true
           prune-cache: true
           cache-dependency-glob: "uv.lock"
+          python-version: 3.13
 
       - name: Install the project
         run: uv sync --locked
@@ -48,7 +49,7 @@ jobs:
         run: echo "uv cache was restored"
 
       - name: Check HF model cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache
         with:
           path: ~/hf_test_model_cache
@@ -59,7 +60,7 @@ jobs:
         run: uv run tests/model_download.py $HOME/hf_test_model_cache
 
       - name: Saving HuggingFace test model
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: ~/hf_test_model_cache
@@ -80,25 +81,26 @@ jobs:
       HF_HOME: /path/to/cache_root
     
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.02
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2
         id: python-setup
         with:
           python-version: ${{ matrix.python-version }}
       
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         id: setup-uv
         with:
           # Install a specific version of uv.
-          version: "0.9.10"
+          version: "0.11.7"
           enable-cache: true
           restore-cache: true
           save-cache: true
           prune-cache: true
           cache-dependency-glob: "uv.lock"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install the project
         run: uv sync --locked
@@ -115,7 +117,7 @@ jobs:
           uv run flake8 --config .flake8 src tests
 
       - name: Cache mypy
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./.mypy_cache
           key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ hashFiles('uv.lock') }}
@@ -138,14 +140,14 @@ jobs:
           echo "HF_HOME=$HOME/.cache/huggingface" >> "$GITHUB_ENV"
 
       - name: Get HF model cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/hf_test_model_cache
           key: ettin-17m-model-${{ runner.os }}
           lookup-only: false
 
       - name: Move cached files
-        run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
+        run: mv $HOME/hf_test_model_cache/* $HF_HOME/hub/.
 
 
       - name: Code coverage testing
