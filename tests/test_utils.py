@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 import torch
 
@@ -31,7 +33,7 @@ def test_get_linear_schedule_with_warmup() -> None:
         for _ in range(num_steps):
             lrs.append(scheduler.get_lr()[0])
             scheduler.step()
-        return lrs
+        return typing.cast(list[float], lrs)
     test_model = torch.nn.Linear(50, 50)
     test_optimizer = torch.optim.AdamW(test_model.parameters(), lr=10.0)
     test_scheduler = utils.get_linear_schedule_with_warmup(test_optimizer, 2, 10)
