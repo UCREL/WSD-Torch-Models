@@ -40,9 +40,10 @@ This will then produce on stdout the following MarkDown table;
 
 | Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| en| Rule Based| 161.40| 204.74| 160.91| 2698.62| 1,643| 1,084| 0.00| 0.00| 0.00 |
-| en| Neural-E-17M| 259.38| 339.66| 691.49| 11323.55| 1,643| 1,084| 0.00| 0.00| 0.00 |
-| en| Hybrid-E-17M| 179.99| 212.40| 502.98| 1302.13| 1,643| 1,084| 0.00| 0.00| 0.00 |
+| English| Neural-E-17M| 198.89| 227.82| 402.59| 350.96| 1,423| 1,154| 0.00| 0.00| 0.00 |
+| English| Neural-E-68M| 381.00| 210.71| 10.80| 3,361.17| 1,423| 1,154| 0.00| 0.00| 0.00 |
+| Multilingual| Neural-M-140M| 1,020.21| 1,032.24| 1,284.75| 2,999.71| 1,423| 1,154| 0.00| 0.00| 0.00 |
+| Multilingual| Neural-M-304M| 1,575.93| 1,613.13| 1,630.09| 638.62| 1,423| 1,154| 0.00| 0.00| 0.00 |
 </details>
 
 To run on GPU (you will need a Nvidia GPU), this first requires building the following docker container (this is best done in a terminal outside of your editor/IDE);
