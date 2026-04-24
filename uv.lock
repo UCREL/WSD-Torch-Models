@@ -3556,6 +3556,13 @@ dependencies = [
     { name = "typing-extensions" },
 ]
 
+[package.optional-dependencies]
+benchmark = [
+    { name = "datasets" },
+    { name = "psutil" },
+    { name = "typer" },
+]
+
 [package.dev-dependencies]
 cpu = [
     { name = "torch", version = "2.11.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-16-wsd-torch-models-cpu') or (extra == 'group-16-wsd-torch-models-cpu' and extra == 'group-16-wsd-torch-models-cu126') or (extra == 'group-16-wsd-torch-models-cpu' and extra == 'group-16-wsd-torch-models-cu128') or (extra == 'group-16-wsd-torch-models-cpu' and extra == 'group-16-wsd-torch-models-cu130') or (extra == 'group-16-wsd-torch-models-cu126' and extra == 'group-16-wsd-torch-models-cu128') or (extra == 'group-16-wsd-torch-models-cu126' and extra == 'group-16-wsd-torch-models-cu130') or (extra == 'group-16-wsd-torch-models-cu128' and extra == 'group-16-wsd-torch-models-cu130')" },
@@ -3572,26 +3579,27 @@ cu130 = [
 ]
 dev = [
     { name = "coverage", extra = ["toml"] },
-    { name = "datasets" },
     { name = "flake8" },
     { name = "isort" },
     { name = "mypy" },
-    { name = "psutil" },
     { name = "pytest" },
-    { name = "typer" },
     { name = "types-pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "datasets", marker = "extra == 'benchmark'", specifier = ">=4.8.4" },
     { name = "huggingface-hub", specifier = "<2.0" },
     { name = "numpy", specifier = ">=1.19.0,<3.0" },
+    { name = "psutil", marker = "extra == 'benchmark'", specifier = ">=7.2.2" },
     { name = "pyyaml", specifier = ">=6.0,<7.0" },
     { name = "safetensors", specifier = ">=0.4.3,<1.0" },
     { name = "torch", specifier = ">=2.2,<3.0" },
     { name = "transformers", specifier = ">=4.54.0,<5.0" },
+    { name = "typer", marker = "extra == 'benchmark'", specifier = ">=0.24.2" },
     { name = "typing-extensions", specifier = ">=4.0,<5.0" },
 ]
+provides-extras = ["benchmark"]
 
 [package.metadata.requires-dev]
 cpu = [{ name = "torch", specifier = ">=2.2,<3.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "wsd-torch-models", group = "cpu" } }]
@@ -3600,13 +3608,10 @@ cu128 = [{ name = "torch", specifier = ">=2.2,<3.0", index = "https://download.p
 cu130 = [{ name = "torch", specifier = ">=2.2,<3.0", index = "https://download.pytorch.org/whl/cu130", conflict = { package = "wsd-torch-models", group = "cu130" } }]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=6.0.0" },
-    { name = "datasets", specifier = ">=4.8.4" },
     { name = "flake8", specifier = ">=3.8" },
     { name = "isort", specifier = ">=6.0" },
     { name = "mypy", specifier = ">=1.12" },
-    { name = "psutil", specifier = ">=7.2.2" },
     { name = "pytest", specifier = ">=6.0,!=7.1.0,!=8.1.0" },
-    { name = "typer", specifier = ">=0.24.2" },
     { name = "types-pyyaml", specifier = ">=6.0,<7.0" },
 ]
 

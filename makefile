@@ -34,7 +34,7 @@ run-cu128:
 .PHONY: add-cu128
 add-cu128:
 	@uv add --no-sync $(CMD)
-	@uv sync --no-group cpu --group cu128
+	@uv sync --no-group cpu --group cu128 --all-extras
 
 .PHONY: tests-cu128
 tests-cu128:

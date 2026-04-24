@@ -213,13 +213,13 @@ To run locally first ensure you have the following tools installed locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-uv sync
+uv sync --all-extras
 ```
 
 This version of `uv sync` will install the CPU version of `torch` to install a `cuda` version, i.e. `cuda 12.8` run the following:
 
 ``` bash
-uv sync --no-group cpu --group cu128
+uv sync --no-group cpu --group cu128 --all-extras
 ```
 
 Currently we support `cu126`, `cu128`, and `cu130`, see the [./pyproject.toml](./pyproject.toml) for more information.

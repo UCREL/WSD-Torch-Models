@@ -23,4 +23,4 @@ RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=.python-version,target=.python-version \
-    uv sync --no-install-project --no-install-workspace --no-group cpu --group cu128
+    uv sync --no-install-project --no-install-workspace --no-group cpu --group cu128 --all-extras

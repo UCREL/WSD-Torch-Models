@@ -27,5 +27,5 @@
                        "ms-azuretools.vscode-containers"]
 		}
   	},
-	"postStartCommand": "uv sync --no-group cpu --group cu128"
+	"postStartCommand": "uv sync --no-group cpu --group cu128 --all-extras"
 }
