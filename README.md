@@ -233,6 +233,7 @@ We have made it slightly simpler with `make` at least for `cu128` (which can be 
 make run-cu128 CMD="python ANY OTHER ARGUMENTS" # Runs Python or any other command that you would after `uv run`
 make tests-cu128 # Runs the tests
 make lint-cu128 # Runs the linting
+make add-cu128 CMD="--dev PACKAGE" # adds the given packages whereby --dev is optional 
 ```
 
 ### Running linters and tests
@@ -248,6 +249,8 @@ To run the tests with code coverage (**NOTE** these are the code coverage tests 
 ``` bash
 make tests
 ```
+
+To note the [./tests/functional_tests/data/large_corpus.txt](./tests/functional_tests/data/large_corpus.txt) has come from the Wikipedia article about a fish genus called [Ornithoprion](https://en.wikipedia.org/wiki/Ornithoprion), the data is licensed under an open license [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.en).
 
 ### Setting a different default python version
 

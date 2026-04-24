@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the [./pyproject.toml](./pyproject.toml) so that local developers can easily install different versions of torch, i.e. cpu or different cuda versions.
 - Updated the [./.github/workflows](./.github/workflows) to use specific GitHub action versions, this should make the workflow more secure. 
 - Updated the [./.devcontainer](./.devcontainer) files so that they use the correct version of torch.
+- Created [./benchmarks/](./benchmarks/) to benchmark speed and memory performance.
+- Created [./tests/functional_tests/](./tests/functional_tests/) to test the whole function of the package, an end to end test of the package. This is mainly to ensure that any changes to the code base does not affect the performance with respect to the accuracy of the existing models.
 
 ## [v0.1.2](https://github.com/UCREL/WSD-Torch-Models/releases/tag/v0.1.2) - 2025-12-10
 

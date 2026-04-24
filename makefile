@@ -31,6 +31,11 @@ release-notes: build-python-package
 run-cu128:
 	@uv run --no-group cpu --group cu128 $(CMD)
 
+.PHONY: add-cu128
+add-cu128:
+	@uv add --no-sync $(CMD)
+	@uv sync --no-group cpu --group cu128
+
 .PHONY: tests-cu128
 tests-cu128:
 	@uv run --no-group cpu --group cu128 coverage run
