@@ -2,12 +2,11 @@ VERSION_CMD = "uv run scripts/get_version.py ./pyproject.toml"
 
 .PHONY: lint
 lint:
-	@echo "ISort:"
-	@uv run isort src tests scripts
-	@echo "Flake 8:"
-	@uv run flake8 --config ./.flake8 src tests
-	@echo "MyPy:"
-	@uv run mypy
+	@echo "Linting with Ruff:"
+	@uv run ruff check --fix-only src tests scripts
+	@uv run ruff check src tests scripts
+	@echo "Type checking with Ty"
+	@uv run ty check src tests scripts
 	@echo "Linting finished"
 
 .PHONY: tests
@@ -43,10 +42,9 @@ tests-cu128:
 
 .PHONY: lint-cu128
 lint-cu128:
-	@echo "ISort:"
-	@uv run --no-group cpu --group cu128 isort src tests scripts
-	@echo "Flake 8:"
-	@uv run --no-group cpu --group cu128 flake8 --config ./.flake8 src tests
-	@echo "MyPy:"
-	@uv run --no-group cpu --group cu128 mypy
+	@echo "Linting with Ruff:"
+	@uv run --no-group cpu --group cu128 ruff check --fix-only src tests scripts
+	@uv run --no-group cpu --group cu128 ruff check src tests scripts
+	@echo "Type checking with Ty"
+	@uv run --no-group cpu --group cu128 ty check src tests scripts
 	@echo "Linting finished"

@@ -25,7 +25,7 @@ class TestBEM:
             "batch_first": True,
             "base_model": None
         }
-        model = BEM(**bem_kwargs)  # type: ignore
+        model = BEM(**bem_kwargs)  # type:ignore
         model.eval()
         return model
 
@@ -212,7 +212,7 @@ class TestBEM:
             all_label_definitions = load_usas_mapper(None)
             label_definitions = {"Z1": all_label_definitions['Z1'],
                                  "Z2": all_label_definitions['Z2']}
-            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)
             assert isinstance(tokenizer, PreTrainedTokenizerBase)
             bem_model.embed_and_set_label_definitions(label_definitions,
                                                       tokenizer)
@@ -256,7 +256,7 @@ class TestBEM:
         all_label_definitions = load_usas_mapper(None)
         label_definitions = {"Z1": all_label_definitions['Z1'],
                              "Z2": all_label_definitions['Z2']}
-        tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+        tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)
         assert isinstance(tokenizer, PreTrainedTokenizerBase)
         bem_model.embed_and_set_label_definitions(label_definitions,
                                                   tokenizer)
@@ -272,7 +272,7 @@ class TestBEM:
     def test_predict(self, bem_model: BEM, with_tokenizer: bool, tokenizer_kwargs: dict[str, Any] | None) -> None:
         tokenizer = None
         if with_tokenizer:
-            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+            tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)
             assert isinstance(tokenizer, PreTrainedTokenizerBase)
         test_tokens = [""]
         # Raise as inference_ready is False
@@ -282,7 +282,7 @@ class TestBEM:
         all_label_definitions = load_usas_mapper(None)
         label_definitions = {"Z1": all_label_definitions['Z1'],
                              "Z2": all_label_definitions['Z2']}
-        label_tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)  # type: ignore
+        label_tokenizer = AutoTokenizer.from_pretrained(bem_model.base_model_name)
         assert isinstance(label_tokenizer, PreTrainedTokenizerBase)
         bem_model.embed_and_set_label_definitions(label_definitions,
                                                   label_tokenizer)

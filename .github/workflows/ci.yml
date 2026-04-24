@@ -109,21 +109,11 @@ jobs:
         if: steps.setup-uv.outputs.cache-hit == 'true'
         run: echo "uv cache was restored"
 
-      - name: isort
-        run: uv run isort --check-only src tests
-      
-      - name: flake8
-        run: |
-          uv run flake8 --config .flake8 src tests
+      - name: Linter
+        run: uv run ruff check src tests scripts
 
-      - name: Cache mypy
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./.mypy_cache
-          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ hashFiles('uv.lock') }}
-
-      - name: mypy
-        run: uv run mypy
+      - name: Type Checking
+        run: uv run ty check src tests scripts
 
       - name: Windows create HuggingFace Hub cache directory
         if: ${{ runner.os == 'Windows' }}

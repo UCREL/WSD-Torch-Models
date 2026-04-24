@@ -2,13 +2,18 @@ import argparse
 import logging
 from pathlib import Path
 
-from huggingface_hub import ModelCard, create_branch, list_repo_refs, model_info
 import torch
+from huggingface_hub import (
+    ModelCard,
+    ModelCardData,
+    create_branch,
+    list_repo_refs,
+    model_info,
+)
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from wsd_torch_models.bem import BEM
 from wsd_torch_models.data_utils import load_usas_mapper
-
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +209,11 @@ if __name__ == "__main__":
         logger.info("Updating README and uploading to the HuggingFace Hub")
         wsd_base_model_id = hyper_parameters_dict["base_model_name"]
         base_model_data = model_info(wsd_base_model_id)
+        if not isinstance(base_model_data.card_data, ModelCardData):
+            raise ValueError("The model card does not have any model card data")
         wsd_model_languages = base_model_data.card_data.language
+        if not isinstance(wsd_model_languages, list):
+            raise ValueError(f"Expected the model language to be of type `list[str]` and not: {type(wsd_model_languages)}")
         wsd_model_languages_yaml_format = "\n- " + "\n- ".join(wsd_model_languages)
 
         model_title: str | None = None

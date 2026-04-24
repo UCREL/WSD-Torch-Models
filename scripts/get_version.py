@@ -1,7 +1,11 @@
 import argparse
 import io
-import tomllib
+import sys
 
+if sys.version_info.major == 3 and sys.version_info.minor < 11:
+    raise RuntimeError(f"Python 3.10+ required, got {sys.version_info.major}.{sys.version_info.minor}")
+
+import tomllib
 
 if __name__ == "__main__":
     description = (

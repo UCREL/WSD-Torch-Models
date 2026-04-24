@@ -16,7 +16,6 @@ from typing import List
 
 import wsd_torch_models
 
-
 TAG = os.environ["TAG"]
 
 

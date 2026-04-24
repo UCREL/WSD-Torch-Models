@@ -58,7 +58,7 @@ def test_bem_tagger(device: Literal["cpu", "cuda"]) -> None:
     wsd_model_name = "ucrelnlp/PyMUSAS-Neural-English-Small-BEM"
     wsd_model = BEM.from_pretrained(wsd_model_name)
     
-    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)  # type: ignore
+    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)
     output_tokens = tokenizer(test_tokens, padding=False, truncation=False, is_split_into_words=True)
     expected_token_ids: list[int] = [50281, 380, 8281, 4310, 369, 2120, 273, 6773, 50282]
     assert output_tokens.input_ids == expected_token_ids
@@ -104,8 +104,7 @@ def test_on_large_corpus(device: Literal["cpu", "cuda"],
 
     wsd_model_name = "ucrelnlp/PyMUSAS-Neural-English-Small-BEM"
     wsd_model = BEM.from_pretrained(wsd_model_name)
-    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)  # type: ignore
-    
+    tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)
     output: list[list[list[str]]] = []
     with torch.inference_mode(mode=True):
         with large_corpus.open("r", encoding="utf-8") as fp:

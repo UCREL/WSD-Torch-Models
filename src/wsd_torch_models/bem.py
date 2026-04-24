@@ -1,27 +1,32 @@
-from collections import OrderedDict
 import inspect
 import json
 import logging
 import os
-from pathlib import Path
-from typing import Any, Optional, Union, overload
 import warnings
+from collections import OrderedDict
+from pathlib import Path
+from typing import Any, Optional, Sequence, Union, overload
 
+import torch
 from huggingface_hub import PyTorchModelHubMixin, constants
 from huggingface_hub.errors import EntryNotFoundError
 from huggingface_hub.file_download import hf_hub_download
 from safetensors.torch import load_file as load_safetensors
 from safetensors.torch import save_file as save_safetensors
 from safetensors.torch import save_model as save_model_as_safetensor
-import torch
 from torch._prims_common import DeviceLikeType
-from transformers import AutoConfig, AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizerBase
+from transformers import (
+    AutoConfig,
+    AutoModel,
+    AutoTokenizer,
+    PreTrainedModel,
+    PreTrainedTokenizerBase,
+)
 from transformers.modeling_outputs import BaseModelOutput
 from typing_extensions import Self
 
 from wsd_torch_models.scalar_mix import ScalarMix
 from wsd_torch_models.utils import tiny_value_of_dtype
-
 
 logger = logging.getLogger(__name__)
 
@@ -359,6 +364,8 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             None
         """
         model_to_save = self.module if hasattr(self, "module") else self
+        if not isinstance(model_to_save, torch.nn.Module):
+            raise ValueError(f"Cannot save the model as it is not a `torch.nn.Module` it is {type(model_to_save)}")
         save_model_as_safetensor(model_to_save, str(save_directory / constants.SAFETENSORS_SINGLE_FILE))  # type: ignore [arg-type]
         auto_model_config = self.base_model.config
         auto_model_config.save_pretrained(str(save_directory / "base_model_config"))
@@ -445,7 +452,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             model_file = os.path.join(model_id, constants.SAFETENSORS_SINGLE_FILE)
             auto_model_config_directory = os.path.join(model_id, config_directory_name)
             auto_model_config = AutoConfig.from_pretrained(auto_model_config_directory)
-            auto_model = AutoModel.from_config(auto_model_config)  # type: ignore
+            auto_model = AutoModel.from_config(auto_model_config)
             model_kwargs["base_model"] = auto_model
 
             label_definitions_directory_path = Path(os.path.join(model_id, label_definitions_directory_name))
@@ -467,7 +474,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 repo_type="model"
             )
             auto_model_config = AutoConfig.from_pretrained(auto_model_config_file)
-            auto_model = AutoModel.from_config(auto_model_config)  # type: ignore
+            auto_model = AutoModel.from_config(auto_model_config)
             model_kwargs["base_model"] = auto_model
   
             try:
@@ -845,7 +852,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         return similarity_score
     
     def predict(self,
-                tokens: list[str],
+                tokens: Sequence[str],
                 sub_word_tokenizer: PreTrainedTokenizerBase | None = None,
                 top_n: int = -1,
                 tokenizer_kwargs: dict[str, Any] | None = None
@@ -869,7 +876,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
         ```
 
         Args:
-            tokens (list[str]): A list of tokens to predict the sense labels for.
+            tokens (Sequence[str]): A list of tokens to predict the sense labels for.
             sub_word_tokenizer (PreTrainedTokenizerBase | None): The sub-word tokenizer
                 used to split the tokens into sub-word tokens that can be used
                 by the model. Default None. If None the tokenizer used
@@ -909,7 +916,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
             if tokenizer_kwargs is None:
                 tokenizer_kwargs = {}
             sub_word_tokenizer = AutoTokenizer.from_pretrained(self.base_model_name,
-                                                               **tokenizer_kwargs)  # type: ignore
+                                                               **tokenizer_kwargs)
             assert isinstance(sub_word_tokenizer, PreTrainedTokenizerBase)
         model_device = self.base_model.device
         number_tokens = len(tokens)  # This can be seen as the batch size.
@@ -971,7 +978,7 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
     @overload
     def to(self, tensor: torch.Tensor, non_blocking: bool = ...) -> Self: ...  # noqa: E704
 
-    def to(self, *args, **kwargs):  # type: ignore
+    def to(self, *args, **kwargs):
         r"""Move and/or cast the parameters and buffers.
 
         This has been taken from torch.nn.Module:
@@ -1104,6 +1111,6 @@ class BEM(torch.nn.Module, PyTorchModelHubMixin):
                 else:
                     raise
 
-        if self.inference_ready:
+        if self.inference_ready and self.label_definition_embeddings is not None:
             self.label_definition_embeddings = convert(self.label_definition_embeddings)
         return self._apply(convert)

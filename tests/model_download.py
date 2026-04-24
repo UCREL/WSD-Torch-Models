@@ -6,7 +6,6 @@ from transformers import AutoModel, AutoTokenizer
 
 from wsd_torch_models.bem import BEM
 
-
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
@@ -29,5 +28,5 @@ if __name__ == "__main__":
             AutoModel.from_pretrained(model, cache_dir=cache_directory)
         else:
             BEM.from_pretrained(model, cache_dir=cache_directory)
-        AutoTokenizer.from_pretrained(model, cache_dir=cache_directory)  # type: ignore
+        AutoTokenizer.from_pretrained(model, cache_dir=cache_directory)
         logger.info(f"Download; {model}")
