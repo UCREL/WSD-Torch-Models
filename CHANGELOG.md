@@ -5,14 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v0.1.3 - 2026-04-29
+
+### Added
 
 - Added the arXiv paper to the PyMUSAS BEM model readme, `model_readmes/pymusas_bem.md`, of which this did require the Bib text to be Python string variable in the convert and upload script `scripts/convert_and_upload_bem_model.py`.
+- Created [./benchmarks/](./benchmarks/) to benchmark speed and memory performance.
+- Created [./tests/functional_tests/](./tests/functional_tests/) to test the whole function of the package, an end to end test of the package. This is mainly to ensure that any changes to the code base does not affect the performance with respect to the accuracy of the existing models.
+
+### Changed
+
 - Changed the [./pyproject.toml](./pyproject.toml) so that local developers can easily install different versions of torch, i.e. cpu or different cuda versions.
 - Updated the [./.github/workflows](./.github/workflows) to use specific GitHub action versions, this should make the workflow more secure. 
 - Updated the [./.devcontainer](./.devcontainer) files so that they use the correct version of torch.
-- Created [./benchmarks/](./benchmarks/) to benchmark speed and memory performance.
-- Created [./tests/functional_tests/](./tests/functional_tests/) to test the whole function of the package, an end to end test of the package. This is mainly to ensure that any changes to the code base does not affect the performance with respect to the accuracy of the existing models.
 - Changed the developer tools from `isort`, `flake8`, `mypy` to `ruff` and `ty`.
 
 ## [v0.1.2](https://github.com/UCREL/WSD-Torch-Models/releases/tag/v0.1.2) - 2025-12-10
