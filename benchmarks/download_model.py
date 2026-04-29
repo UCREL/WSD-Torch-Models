@@ -1,13 +1,10 @@
 import logging
-from pathlib import Path
 from typing import Annotated
 
 import typer
-from transformers import AutoModel, AutoTokenizer
-
+from transformers import AutoTokenizer
 
 from wsd_torch_models.bem import BEM
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +15,7 @@ def main(huggingface_model_id: Annotated[str, typer.Argument(help="The HuggingFa
     """
     logger.info(f"Downloading model; {huggingface_model_id} and tokenizer.")
     BEM.from_pretrained(huggingface_model_id)
-    AutoTokenizer.from_pretrained(huggingface_model_id)  # type: ignore
+    AutoTokenizer.from_pretrained(huggingface_model_id)
     logger.info(f"Download; {huggingface_model_id}")
 
 if __name__ == "__main__":

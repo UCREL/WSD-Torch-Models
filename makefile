@@ -3,10 +3,10 @@ VERSION_CMD = "uv run scripts/get_version.py ./pyproject.toml"
 .PHONY: lint
 lint:
 	@echo "Linting with Ruff:"
-	@uv run ruff check --fix-only src tests scripts
-	@uv run ruff check src tests scripts
+	@uv run ruff check --fix-only src tests scripts benchmarks
+	@uv run ruff check src tests scripts benchmarks
 	@echo "Type checking with Ty"
-	@uv run ty check src tests scripts
+	@uv run ty check src tests scripts benchmarks
 	@echo "Linting finished"
 
 .PHONY: tests
@@ -43,8 +43,8 @@ tests-cu128:
 .PHONY: lint-cu128
 lint-cu128:
 	@echo "Linting with Ruff:"
-	@uv run --no-group cpu --group cu128 ruff check --fix-only src tests scripts
-	@uv run --no-group cpu --group cu128 ruff check src tests scripts
+	@uv run --no-group cpu --group cu128 ruff check --fix-only src tests scripts benchmarks
+	@uv run --no-group cpu --group cu128 ruff check src tests scripts benchmarks
 	@echo "Type checking with Ty"
-	@uv run --no-group cpu --group cu128 ty check src tests scripts
+	@uv run --no-group cpu --group cu128 ty check src tests scripts benchmarks
 	@echo "Linting finished"

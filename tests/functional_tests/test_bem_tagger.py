@@ -59,6 +59,7 @@ def test_bem_tagger(device: Literal["cpu", "cuda"]) -> None:
     wsd_model = BEM.from_pretrained(wsd_model_name)
     
     tokenizer = AutoTokenizer.from_pretrained(wsd_model_name, add_prefix_space=True)
+    assert tokenizer is not None
     output_tokens = tokenizer(test_tokens, padding=False, truncation=False, is_split_into_words=True)
     expected_token_ids: list[int] = [50281, 380, 8281, 4310, 369, 2120, 273, 6773, 50282]
     assert output_tokens.input_ids == expected_token_ids

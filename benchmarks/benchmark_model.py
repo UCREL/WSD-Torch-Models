@@ -1,11 +1,11 @@
-from pathlib import Path
 import tempfile
 import timeit
+from pathlib import Path
 
 import benchmarking_utils
+import torch
 import typer
 from transformers import PreTrainedTokenizerBase
-import torch
 
 from wsd_torch_models.bem import BEM
 
@@ -141,9 +141,9 @@ def main(language: benchmarking_utils.Languages = typer.Argument(help=language_c
         large_text = ""
         for line in benchmarking_utils.text_from_files(Path(temp_dir), temp_file_prefix):
             large_text += line
-            output_statistics[large_text_tokens_processed_key] += len(line.split())  # type: ignore[operator]
+            output_statistics[large_text_tokens_processed_key] += len(line.split())  # type: ignore
 
-            if output_statistics[large_text_tokens_processed_key] >= large_text_token_limit:  # type: ignore[operator]
+            if output_statistics[large_text_tokens_processed_key] >= large_text_token_limit:  # type: ignore
                 break
         
         with benchmarking_utils.track_memory_usage(large_text_memory_requirements_key, large_gpu_memory_requirements_key, output_statistics, device):
@@ -151,8 +151,8 @@ def main(language: benchmarking_utils.Languages = typer.Argument(help=language_c
                 large_text_tokens = large_text.split()
                 neural_model.predict(large_text_tokens, sub_word_tokenizer=tokenizer, top_n=5)
 
-    output_statistics[average_memory_required_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
-    output_statistics[large_text_memory_requirements_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
+    output_statistics[average_memory_required_key] += output_statistics[load_memory_requirements_key]  # type: ignore
+    output_statistics[large_text_memory_requirements_key] += output_statistics[load_memory_requirements_key]  # type: ignore
     benchmarking_utils.to_json_file(output_file, output_statistics)
 
 

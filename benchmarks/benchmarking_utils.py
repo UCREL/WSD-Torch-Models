@@ -1,16 +1,15 @@
+import json
+import os
+import warnings
 from contextlib import contextmanager
-from typing import Iterator, Iterable
 from enum import Enum
 from pathlib import Path
-import warnings
-import os
-import json
+from typing import Iterable, Iterator
 
-from datasets import load_dataset
-import torch
 import psutil
-from transformers import AutoTokenizer
-from transformers import PreTrainedTokenizerBase
+import torch
+from datasets import load_dataset
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from wsd_torch_models.bem import BEM
 
@@ -79,6 +78,7 @@ def load_tagger(model_id: str, device: str) -> tuple[BEM, PreTrainedTokenizerBas
         warnings.simplefilter("ignore")
         wsd_model = BEM.from_pretrained(model_id)
         tokenizer = AutoTokenizer.from_pretrained(model_id, add_prefix_space=True)
+        assert isinstance(tokenizer, PreTrainedTokenizerBase)
         wsd_model.to(device)
         wsd_model.eval()
         return (wsd_model, tokenizer)

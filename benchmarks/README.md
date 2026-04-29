@@ -71,6 +71,7 @@ These are the current results on `cuda` and `cpu` respectively when running on a
 CPU:
 ``` bash
 bash run_benchmark.sh -d cuda -t 100000 -l 1500
+```
 
 | Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -78,11 +79,12 @@ bash run_benchmark.sh -d cuda -t 100000 -l 1500
 | English| Neural-E-68M| 413.31| 1,231.05| 388.45| 2,676.74| 100,511| 1,620| 264.02| 594.56| 7,196.18 |
 | Multilingual| Neural-M-140M| 1,033.38| 1,222.97| 997.85| 2,235.65| 100,511| 1,620| 537.28| 827.67| 5,840.12 |
 | Multilingual| Neural-M-304M| 942.51| 1,298.80| 894.18| 2,345.30| 100,511| 1,620| 1,190.79| 1,761.80| 11,745.87 |
-```
+
 
 GPU:
 ``` bash
 docker run --rm --gpus all --shm-size 4g wsd-torch-gpu-benchmarking:0.1.0 --device cuda --token-limit 100000 --large-text-token-limit 1500
+```
 
 | Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -90,7 +92,7 @@ docker run --rm --gpus all --shm-size 4g wsd-torch-gpu-benchmarking:0.1.0 --devi
 | English| Neural-E-68M| 2.65| 711.94| -16.82| 2,696.52| 100,511| 1,620| 264.02| 594.56| 7,196.18 |
 | Multilingual| Neural-M-140M| 697.93| 1,809.50| 642.09| 2,215.45| 100,511| 1,620| 537.28| 827.67| 5,840.12 |
 | Multilingual| Neural-M-304M| 476.82| 822.03| 455.48| 2,313.53| 100,511| 1,620| 1,190.79| 1,761.80| 11,745.87 |
-```
+
 
 ## How to interpret the benchmark results
 
